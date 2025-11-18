@@ -1,0 +1,113 @@
+package main.entities;
+import main.entities.Plant;
+import main.entities.Animal;
+import main.entities.Air;
+import main.entities.Soil;
+import fileio.WaterInput;
+import java.util.*;
+
+public class Water {
+    protected String name;
+    protected double mass;
+    protected String type;
+    private double salinity;
+    private double pH;
+    private double purity;
+    private double turbidity;
+    private double contaminantIndex;
+    private boolean isFrozen;
+
+    public Water(String name, double mass) {
+        this.name = name;
+        this.mass = mass;
+        this.type = null;
+        this.salinity = 0.0;
+        this.pH = 0.0;
+        this.purity = 0.0;
+        this.turbidity = 0.0;
+        this.contaminantIndex = 0.0;
+        this.isFrozen = false;
+    }
+
+    //getter si setter pentru campul privat "salinity"
+    public double getSalinity() {
+        return this.salinity;
+    }
+    public void setSalinity(double salinity) {
+        this.salinity = salinity;
+    }
+
+    //getter si setter pentru campul privat "pH"
+    public double getpH() {
+        return this.pH;
+    }
+    public void setpH(double pH) {
+        this.pH = pH;
+    }
+
+    //getter si setter pentru campul privat "purity"
+    public double getPurity() {
+        return this.purity;
+    }
+    public void setPurity(double Purity) {
+        this.purity = purity;
+    }
+
+    //getter si setter pentru campul privat "turbidity"
+    public double getTurbidity() {
+        return this.turbidity;
+    }
+    public void setTurbidity(double turbidity) {
+        this.turbidity = turbidity;
+    }
+
+    //getter si setter pentru campul privat "contaminantIndex"
+    public double getContaminantIndex() {
+        return this.contaminantIndex;
+    }
+    public void setContaminantIndex(double contaminantIndex) {
+        this.contaminantIndex = contaminantIndex;
+    }
+
+    //getter si setter pentru campul privat "isFrozen"
+    public boolean getIsFrozen() {
+        return this.isFrozen;
+    }
+    public void setIsFrozen(boolean isFrozen) {
+        this.isFrozen = isFrozen;
+    }
+
+    protected double waterQuality() {
+        double purityScore = purity / 100;
+        double pHScore = 1 - Math.abs(pH - 7.5) / 7.5;
+        double salinityScore = 1 - (salinity / 350);
+        double turbidityScore = 1 - (turbidity / 100);
+        double contaminantScore = 1 - (contaminantIndex / 100);
+        double frozenScore;
+        if (isFrozen != false) {
+            frozenScore = 0.0;
+        } else {
+            frozenScore = 1.0;
+        }
+        double quality = (0.3 * purityScore + 0.2 * pHScore + 0.15 * salinityScore + 0.1 * turbidityScore + 0.15 * contaminantScore + 0.2 * frozenScore) * 100;
+        return quality;
+    }
+
+    protected String getQuality() {
+        double quality = waterQuality();
+        if (quality >= 70.0 && quality <= 100.0) {
+            return "Good";
+        }
+        if (quality >= 40.0 && quality < 70.0) {
+            return "Moderate";
+        }
+        return "Poor";
+    }
+
+    protected boolean isEmpty() {
+        if (mass <= 0) {
+            return true;
+        }
+        return false;
+    }
+}

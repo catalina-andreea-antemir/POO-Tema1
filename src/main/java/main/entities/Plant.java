@@ -28,7 +28,6 @@ public abstract class Plant {
     public String getMaturityLevel() {
         return this.maturityLevel;
     }
-
     public void setMaturityLevel(String maturityLevel) {
         this.maturityLevel = maturityLevel;
     }
@@ -36,19 +35,13 @@ public abstract class Plant {
     public double getMaturityOxygen() {
         return this.maturityOxygen;
     }
-
     public void setMaturityOxygen(double maturityOxygen) {
         this.maturityOxygen = maturityOxygen;
-    }
-
-    public boolean isDead() {
-        return isDead;
     }
 
     public double getGrowthLevel() {
         return this.growthLevel;
     }
-
     public void setGrowthLevel(double growthLevel) {
         this.growthLevel = growthLevel;
     }
@@ -56,7 +49,6 @@ public abstract class Plant {
     public boolean getIsDead() {
         return this.isDead;
     }
-
     public void setIsDead(boolean isDead) {
         this.isDead = isDead;
     }

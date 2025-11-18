@@ -13,13 +13,13 @@ public class ForestSoil extends Soil {
 
     @Override
     protected double qualityScore() {
-        double score = (nitrogen * 1.2) + (organicMatter * 2) + (waterRetention * 1.5) + (leafLitter * 0.3);
-        score = normalizeScore(score);
+        double score = (getNitrogen() * 1.2) + (getOrganicMatter() * 2) + (getWaterRetention() * 1.5) + (getLeafLitter() * 0.3);
+        score = normalize(score);
         return score;
     }
 
     @Override
     protected double blockProbability() {
-        return (waterRetention * 0.6 + leafLitter * 0.4) / 80 * 100;
+        return (getWaterRetention() * 0.6 + getLeafLitter() * 0.4) / 80 * 100;
     }
 }

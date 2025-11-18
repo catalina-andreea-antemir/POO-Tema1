@@ -13,13 +13,13 @@ public class DesertSoil extends Soil {
 
     @Override
     protected double qualityScore() {
-        double score = (nitrogen * 0.5) + (waterRetention * 0.3) - (salinity * 2);
-        score = normalizeScore(score);
+        double score = (getNitrogen() * 0.5) + (getWaterRetention() * 0.3) - (getSalinity() * 2);
+        score = normalize(score);
         return score;
     }
 
     @Override
     protected double blockProbability() {
-        return (100 - waterRetention + salinity) / 100 * 100;
+        return (100 - getWaterRetention() + getSalinity()) / 100 * 100;
     }
 }

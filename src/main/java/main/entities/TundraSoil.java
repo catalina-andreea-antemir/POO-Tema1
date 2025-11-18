@@ -13,13 +13,13 @@ public class TundraSoil extends Soil {
 
     @Override
     protected double qualityScore() {
-        double score = (nitrogen * 0.7) + (organicMatter * 0.5) - (permafrostDepth * 1.5);
-        score = normalizeScore(score);
+        double score = (getNitrogen() * 0.7) + (getOrganicMatter() * 0.5) - (getPermafrostDepth() * 1.5);
+        score = normalize(score);
         return score;
     }
 
     @Override
     protected double blockProbability() {
-        return (50 - permafrostDepth) / 50 * 100;
+        return (50 - getPermafrostDepth()) / 50 * 100;
     }
 }

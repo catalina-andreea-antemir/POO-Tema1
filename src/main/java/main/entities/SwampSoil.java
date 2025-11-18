@@ -13,13 +13,13 @@ public class SwampSoil extends Soil {
 
     @Override
     protected double qualityScore() {
-        double score = (nitrogen * 1.1) + (organicMatter * 2.2) - (waterLogging * 5);
-        score = normalizeScore(score);
+        double score = (getNitrogen() * 1.1) + (getOrganicMatter() * 2.2) - (getWaterLogging() * 5);
+        score = normalize(score);
         return score;
     }
 
     @Override
     protected double blockProbability() {
-        return waterLogging * 10;
+        return getWaterLogging() * 10;
     }
 }

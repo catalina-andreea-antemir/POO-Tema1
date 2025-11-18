@@ -10,15 +10,15 @@ public abstract class Soil {
     protected String name;
     protected double mass;
     protected String type;
-    protected double nitrogen;
-    protected double waterRetention;
-    protected double soilpH;
-    protected double organicMatter;
-    protected double leafLitter;
-    protected double waterLogging;
-    protected double rootDensity;
-    protected double permafrostDepth;
-    protected double salinity;
+    private double nitrogen;
+    private double waterRetention;
+    private double soilpH;
+    private double organicMatter;
+    private double leafLitter;
+    private double waterLogging;
+    private double rootDensity;
+    private double permafrostDepth;
+    private double salinity;
 
     public Soil(String name, double mass) {
         this.name = name;
@@ -35,9 +35,70 @@ public abstract class Soil {
         this.salinity = 0.0;
     }
 
-    //FA GETTERI SI SETTERI IN CAZ CA O SA AI NEVOIE PT CAMPURILE PRIVATE
+    public double getNitrogen() {
+        return this.nitrogen;
+    }
+    public void setNitrogen(double nitrogen) {
+        this.nitrogen = nitrogen;
+    }
 
-    protected double normalizeScore(double score) {
+    public double getWaterRetention() {
+        return this.waterRetention;
+    }
+    public void setWaterRetention(double waterRetention) {
+        this.waterRetention = waterRetention;
+    }
+
+    public double getSoilpH() {
+        return this.soilpH;
+    }
+    public void setSoilpH(double soilpH) {
+        this.soilpH = soilpH;
+    }
+
+    public double getOrganicMatter() {
+        return this.organicMatter;
+    }
+    public void setOrganicMatter(double organicMatter) {
+        this.organicMatter = organicMatter;
+    }
+
+    public double getLeafLitter() {
+        return this.leafLitter;
+    }
+    public void setLeafLitter(double leafLitter) {
+        this.leafLitter = leafLitter;
+    }
+
+    public double getWaterLogging() {
+        return this.waterLogging;
+    }
+    public void setWaterLogging(double waterLogging) {
+        this.waterLogging = waterLogging;
+    }
+
+    public double getRootDensity() {
+        return this.rootDensity;
+    }
+    public void setRootDensity(double rootDensity) {
+        this.rootDensity = rootDensity;
+    }
+
+    public double getPermafrostDepth() {
+        return this.permafrostDepth;
+    }
+    public void setPermafrostDepth(double permafrostDepth) {
+        this.permafrostDepth = permafrostDepth;
+    }
+
+    public double getSalinity() {
+        return this.salinity;
+    }
+    public void setSalinity(double salinity) {
+        this.salinity = salinity;
+    }
+
+    protected double normalize(double score) {
         double normalized = Math.max(0, Math.min(100, score));
         score = Math.round(normalized * 100.0) / 100.0;
         return score;

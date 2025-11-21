@@ -3,13 +3,11 @@ import main.entities.Water;
 import main.entities.Animal;
 import main.entities.Air;
 import main.entities.Soil;
-import fileio.PlantInput;
-import java.util.*;
 
 public abstract class Plant {
-    protected String name;
-    protected double mass;
-    protected String type;
+    private String name;
+    private double mass;
+    public String type;
     private String maturityLevel;
     private double maturityOxygen;
     private double growthLevel;
@@ -23,6 +21,27 @@ public abstract class Plant {
         this.maturityOxygen = 0.0;
         this.growthLevel = 0.0;
         this.isDead = false;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getMass() {
+        return this.mass;
+    }
+    public void setMass(double mass) {
+        this.mass = mass;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getMaturityLevel() {

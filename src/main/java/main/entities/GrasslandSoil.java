@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class GrasslandSoil extends Soil {
     public GrasslandSoil(String name, double mass) {
@@ -14,8 +13,7 @@ public class GrasslandSoil extends Soil {
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 1.3) + (getOrganicMatter() * 1.5) + (getRootDensity() * 0.8);
-        score = normalize(score);
-        return score;
+        return normalize(score);
     }
 
     @Override

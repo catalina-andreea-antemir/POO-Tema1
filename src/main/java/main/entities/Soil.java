@@ -4,12 +4,11 @@ import main.entities.Animal;
 import main.entities.Water;
 import main.entities.Air;
 import fileio.SoilInput;
-import java.util.*;
 
 public abstract class Soil {
-    protected String name;
-    protected double mass;
-    protected String type;
+    private String name;
+    private double mass;
+    private String type;
     private double nitrogen;
     private double waterRetention;
     private double soilpH;
@@ -33,6 +32,27 @@ public abstract class Soil {
         this.rootDensity = 0.0;
         this.permafrostDepth = 0.0;
         this.salinity = 0.0;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getMass() {
+        return this.mass;
+    }
+    public void setMass(double mass) {
+        this.mass = mass;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 
     public double getNitrogen() {
@@ -105,17 +125,20 @@ public abstract class Soil {
     }
 
     protected abstract double qualityScore();
+    public double getQuality() {
+        return qualityScore();
+    }
     protected abstract double blockProbability();
 
-    public String getQuality() {
+    public String qualityLabel() {
         double quality = qualityScore();
-        if (quality >= 70.0 && quality <= 100.0) {
-            return "Good";
+        if (quality > 70.0 && quality <= 100.0) {
+            return "good";
         }
-        if (quality >= 40.0 && quality < 70.0) {
-            return "Moderate";
+        if (quality > 40.0 && quality <= 70.0) {
+            return "moderate";
         }
-        return "Poor";
+        return "poor";
     }
 
     void addWaterRetention(double waterRetention, int iterations) {

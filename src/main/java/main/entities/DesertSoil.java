@@ -14,8 +14,7 @@ public class DesertSoil extends Soil {
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 0.5) + (getWaterRetention() * 0.3) - (getSalinity() * 2);
-        score = normalize(score);
-        return score;
+        return normalize(score);
     }
 
     @Override

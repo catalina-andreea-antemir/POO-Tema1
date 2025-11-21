@@ -4,12 +4,11 @@ import main.entities.Animal;
 import main.entities.Air;
 import main.entities.Soil;
 import fileio.WaterInput;
-import java.util.*;
 
 public class Water {
-    protected String name;
-    protected double mass;
-    protected String type;
+    private String name;
+    private double mass;
+    private String type;
     private double salinity;
     private double pH;
     private double purity;
@@ -27,6 +26,27 @@ public class Water {
         this.turbidity = 0.0;
         this.contaminantIndex = 0.0;
         this.isFrozen = false;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getMass() {
+        return this.mass;
+    }
+    public void setMass(double mass) {
+        this.mass = mass;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 
     //getter si setter pentru campul privat "salinity"

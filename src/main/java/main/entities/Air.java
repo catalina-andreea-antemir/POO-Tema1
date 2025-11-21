@@ -4,12 +4,11 @@ import main.entities.Animal;
 import main.entities.Water;
 import main.entities.Soil;
 import fileio.AirInput;
-import java.util.*;
 
 public abstract class Air {
-    protected String name;
-    protected double mass;
-    protected String type;
+    private String name;
+    private double mass;
+    private String type;
     private double humidity;
     private double temperature;
     private double oxygenLevel;
@@ -31,6 +30,27 @@ public abstract class Air {
         this.pollenLevel = 0.0;
         this.dustParticles = 0.0;
         this.altitude = 0.0;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getMass() {
+        return this.mass;
+    }
+    public void setMass(double mass) {
+        this.mass = mass;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 
     public double getHumidity() {
@@ -57,7 +77,7 @@ public abstract class Air {
     public double getCo2Level() {
         return this.co2Level;
     }
-        public void setCo2Level(double co2Level) {
+    public void setCo2Level(double co2Level) {
         this.co2Level = co2Level;
     }
 
@@ -89,24 +109,28 @@ public abstract class Air {
         this.altitude = altitude;
     }
 
-    protected void normalize(double quality) {
-        quality = Math.max(0, Math.min(100, quality));
-        quality = Math.round(quality * 100.0) / 100.0;
+    protected double normalize(double score) {
+        double normalized = Math.max(0, Math.min(100, score));
+        score = Math.round(normalized * 100.0) / 100.0;
+        return score;
     }
 
     protected abstract double airQuality();
+    public double getQuality() {
+        return airQuality();
+    }
     protected abstract int maxScore();
     protected abstract double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers);
 
-    protected String qualityLabel() {
+    public String qualityLabel() {
         double quality = airQuality();
-        if (quality >= 70.0 && quality <= 100.0) {
-            return "Good";
+        if (quality > 70.0 && quality <= 100.0) {
+            return "good";
         }
-        if (quality >= 40.0 && quality < 70.0) {
-            return "Moderate";
+        if (quality > 40.0 && quality <= 70.0) {
+            return "moderate";
         }
-        return "Poor";
+        return "poor";
     }
 
     protected double airToxicity() {

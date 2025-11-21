@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Soil;
 import main.entities.Air;
 import main.entities.Water;
-import java.util.*;
 
 public class GymnospermsPlants extends Plant{
     public GymnospermsPlants(String name, double mass) {

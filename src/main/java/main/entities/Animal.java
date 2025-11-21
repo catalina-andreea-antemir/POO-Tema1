@@ -3,12 +3,11 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Air;
 import main.entities.Soil;
-import java.util.*;
 
 public abstract class Animal {
-    protected String name;
-    protected double mass;
-    protected String type;
+    private String name;
+    private double mass;
+    private String type;
     private String status;
     private double intakeRate;
     private boolean isScanned;
@@ -22,6 +21,27 @@ public abstract class Animal {
         this.intakeRate = 0.08;
         this.isScanned = false;
         this.isDead = false;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getMass() {
+        return this.mass;
+    }
+    public void setMass(double mass) {
+        this.mass = mass;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStatus() {

@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class Mountain extends Air {
     public Mountain(String name, double mass) {
@@ -15,8 +14,7 @@ public class Mountain extends Air {
     protected double airQuality() {
         double oxygenFactor = getOxygenLevel() - (getAltitude() / 1000 * 0.5);
         double quality = (oxygenFactor * 2) + (getHumidity() * 0.6);
-        normalize(quality);
-        return quality;
+        return normalize(quality);
     }
 
     @Override

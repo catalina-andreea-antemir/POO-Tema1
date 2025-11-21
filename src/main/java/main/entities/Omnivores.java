@@ -23,25 +23,26 @@ public class Omnivores extends Animal{
         int entitiesEaten = 0;
         double organicMatter = 0.0;
         if (prey == null) {
-            if (plant != null) {
-                mass += plant.mass;
+            if (plant != null && plant.getMass() != 0.0) {
+                setMass(getMass() + plant.getMass());
+                plant.setMass(0.0);
                 plant.setIsDead(true);
-                setStatus("Well-Fed");
                 entitiesEaten += 1;
             }
-            if (water != null) {
-                double waterToDrink = Math.min(mass * getIntakeRate(), water.mass);
-                water.mass -= waterToDrink;
-                mass += waterToDrink;
-                setStatus("Well-Fed");
+            if (water != null && water.getMass() != 0.0) {
+                double waterToDrink = Math.min(getMass() * getIntakeRate(), water.getMass());
+                water.setMass(water.getMass() - waterToDrink);
+                setMass(getMass() + waterToDrink);
                 entitiesEaten += 1;
             }
         }
         if (entitiesEaten == 2) {
             organicMatter = 0.8;
+            setStatus("Well-Fed");
         } else {
             if (entitiesEaten == 1) {
                 organicMatter = 0.5;
+                setStatus("Well-Fed");
             } else {
                 organicMatter = 0.0;
                 setStatus("Hungry");

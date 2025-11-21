@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class Temperate extends Air {
     public Temperate(String name, double mass) {
@@ -14,8 +13,7 @@ public class Temperate extends Air {
     @Override
     protected double airQuality() {
         double quality = (getOxygenLevel() * 2) + (getHumidity() * 0.7) - (getPollenLevel() * 0.1);
-        normalize(quality);
-        return quality;
+        return normalize(quality);
     }
 
     @Override

@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Soil;
 import main.entities.Air;
 import main.entities.Water;
-import java.util.*;
 
 public class Ferns extends Plant{
     public Ferns(String name, double mass) {

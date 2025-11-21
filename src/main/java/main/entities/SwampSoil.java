@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class SwampSoil extends Soil {
     public SwampSoil(String name, double mass) {
@@ -14,8 +13,7 @@ public class SwampSoil extends Soil {
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 1.1) + (getOrganicMatter() * 2.2) - (getWaterLogging() * 5);
-        score = normalize(score);
-        return score;
+        return normalize(score);
     }
 
     @Override

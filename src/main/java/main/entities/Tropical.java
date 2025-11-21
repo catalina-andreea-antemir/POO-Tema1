@@ -14,8 +14,7 @@ public class Tropical extends Air {
     @Override
     protected double airQuality() {
         double quality = (getOxygenLevel() * 2) + (getHumidity() * 0.5) - (getCo2Level() * 0.01);
-        normalize(quality);
-        return quality;
+        return normalize(quality);
     }
 
     @Override

@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class Polar extends Air {
     public Polar(String name, double mass) {
@@ -14,8 +13,7 @@ public class Polar extends Air {
     @Override
     protected double airQuality() {
         double quality = (getOxygenLevel() * 2) + (100 - Math.abs(getTemperature())) - (getIceCrystalConcentration() * 0.05);
-        normalize(quality);
-        return quality;
+        return normalize(quality);
     }
 
     @Override

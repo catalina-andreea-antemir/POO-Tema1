@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class Carnivores extends Animal{
     public Carnivores(String name, double mass) {
@@ -22,20 +21,22 @@ public class Carnivores extends Animal{
     protected double animalEats(Animal prey, Plant plant, Water water) {
         int entitiesEaten = 0;
         double organicMatter;
-        if (prey != null) {
-            mass += prey.mass;
+        if (prey != null && prey.getMass() != 0.0) {
+            setMass(getMass() + prey.getMass());
+            prey.setMass(0.0);
             prey.setIsDead(true);
             entitiesEaten = 1;
         } else {
-            if (plant != null) {
-                mass += plant.mass;
+            if (plant != null && plant.getMass() != 0.0) {
+                setMass(getMass() + plant.getMass());
+                plant.setMass(0.0);
                 plant.setIsDead(true);
                 entitiesEaten += 1;
             }
-            if (water != null) {
-                double waterToDrink = Math.min(mass * getIntakeRate(), water.mass);
-                water.mass -= waterToDrink;
-                mass += waterToDrink;
+            if (water != null && water.getMass() != 0.0) {
+                double waterToDrink = Math.min(getMass() * getIntakeRate(), water.getMass());
+                water.setMass(water.getMass() - waterToDrink);
+                setMass(getMass() + waterToDrink);
                 entitiesEaten += 1;
             }
         }

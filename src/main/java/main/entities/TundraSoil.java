@@ -4,7 +4,6 @@ import main.entities.Plant;
 import main.entities.Water;
 import main.entities.Soil;
 import main.entities.Air;
-import java.util.*;
 
 public class TundraSoil extends Soil {
     public TundraSoil(String name, double mass) {
@@ -14,8 +13,7 @@ public class TundraSoil extends Soil {
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 0.7) + (getOrganicMatter() * 0.5) - (getPermafrostDepth() * 1.5);
-        score = normalize(score);
-        return score;
+        return normalize(score);
     }
 
     @Override

@@ -14,8 +14,7 @@ public class Desert extends Air {
     @Override
     protected double airQuality() {
         double quality = (getOxygenLevel() * 2) - (getDustParticles() * 0.2) - (getTemperature() * 0.3);
-        normalize(quality);
-        return quality;
+        return normalize(quality);
     }
 
     @Override
@@ -29,7 +28,7 @@ public class Desert extends Air {
         if (desertStorm) {
             quality -= 30;
         }
-        normalize(quality);
+        quality = normalize(quality);
         return quality;
     }
 }

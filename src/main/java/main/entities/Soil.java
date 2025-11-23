@@ -34,6 +34,7 @@ public abstract class Soil {
         this.salinity = 0.0;
     }
 
+    //metode getter si setter pentru campul privat name
     public String getName() {
         return this.name;
     }
@@ -41,6 +42,7 @@ public abstract class Soil {
         this.name = name;
     }
 
+    //metode getter si setter pentru campul privat mass
     public double getMass() {
         return this.mass;
     }
@@ -48,6 +50,7 @@ public abstract class Soil {
         this.mass = mass;
     }
 
+    //metode getter si setter pentru campul privat type
     public String getType() {
         return this.type;
     }
@@ -55,6 +58,7 @@ public abstract class Soil {
         this.type = type;
     }
 
+    //metode getter si setter pentru campul privat nitrogen
     public double getNitrogen() {
         return this.nitrogen;
     }
@@ -62,6 +66,7 @@ public abstract class Soil {
         this.nitrogen = nitrogen;
     }
 
+    //metode getter si setter pentru campul privat waterRetention
     public double getWaterRetention() {
         return this.waterRetention;
     }
@@ -69,6 +74,7 @@ public abstract class Soil {
         this.waterRetention = waterRetention;
     }
 
+    //metode getter si setter pentru campul privat soilpH
     public double getSoilpH() {
         return this.soilpH;
     }
@@ -76,6 +82,7 @@ public abstract class Soil {
         this.soilpH = soilpH;
     }
 
+    //metode getter si setter pentru campul privat organicMetter
     public double getOrganicMatter() {
         return this.organicMatter;
     }
@@ -83,6 +90,7 @@ public abstract class Soil {
         this.organicMatter = organicMatter;
     }
 
+    //metode getter si setter pentru campul privat leafLitter
     public double getLeafLitter() {
         return this.leafLitter;
     }
@@ -90,6 +98,7 @@ public abstract class Soil {
         this.leafLitter = leafLitter;
     }
 
+    //metode getter si setter pentru campul privat waterLogging
     public double getWaterLogging() {
         return this.waterLogging;
     }
@@ -97,6 +106,7 @@ public abstract class Soil {
         this.waterLogging = waterLogging;
     }
 
+    //metode getter si setter pentru campul privat rootDensity
     public double getRootDensity() {
         return this.rootDensity;
     }
@@ -104,6 +114,7 @@ public abstract class Soil {
         this.rootDensity = rootDensity;
     }
 
+    //metode getter si setter pentru campul privat permafrostDepth
     public double getPermafrostDepth() {
         return this.permafrostDepth;
     }
@@ -111,6 +122,7 @@ public abstract class Soil {
         this.permafrostDepth = permafrostDepth;
     }
 
+    //metode getter si setter pentru campul privat salinity
     public double getSalinity() {
         return this.salinity;
     }
@@ -118,21 +130,26 @@ public abstract class Soil {
         this.salinity = salinity;
     }
 
+    //metoda helper de noramlizare
     protected double normalize(double score) {
         double normalized = Math.max(0, Math.min(100, score));
         score = Math.round(normalized * 100.0) / 100.0;
         return score;
     }
 
+    //returneaza calitatea solului in functie de fiecare tip de sol pe baza unei formule
     protected abstract double qualityScore();
     public double getQuality() {
         return qualityScore();
     }
+
+    //calculeaza probabilitatea de atac pe baza unei formule specifice fiecarui tip
     protected abstract double blockProbability();
     public double getBlockProbability() {
         return blockProbability();
     }
 
+    //stabileste aticeta de calitate a solului in functie de calitatea calculata pt fiecare tip
     public String qualityLabel() {
         double quality = qualityScore();
         if (quality > 70.0 && quality <= 100.0) {

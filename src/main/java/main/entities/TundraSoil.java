@@ -10,12 +10,14 @@ public class TundraSoil extends Soil {
         super(name, mass);
     }
 
+    //returneaza calitatea solului in functie de fiecare tip de sol pe baza unei formule
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 0.7) + (getOrganicMatter() * 0.5) - (getPermafrostDepth() * 1.5);
         return normalize(score);
     }
 
+    //calculeaza probabilitatea de atac pe baza unei formule specifice fiecarui tip
     @Override
     protected double blockProbability() {
         return (50 - getPermafrostDepth()) / 50 * 100;

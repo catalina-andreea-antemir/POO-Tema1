@@ -36,6 +36,7 @@ public abstract class Air {
         this.expirationTime = -1;
     }
 
+    //metode getter si setter pentru campul privat name
     public String getName() {
         return this.name;
     }
@@ -43,6 +44,7 @@ public abstract class Air {
         this.name = name;
     }
 
+    //metode getter si setter pentru campul privat mass
     public double getMass() {
         return this.mass;
     }
@@ -50,6 +52,7 @@ public abstract class Air {
         this.mass = mass;
     }
 
+    //metode getter si setter pentru campul privat type
     public String getType() {
         return this.type;
     }
@@ -57,6 +60,7 @@ public abstract class Air {
         this.type = type;
     }
 
+    //metode getter si setter pentru campul privat humidity
     public double getHumidity() {
         return this.humidity;
     }
@@ -64,6 +68,7 @@ public abstract class Air {
         this.humidity = humidity;
     }
 
+    //metode getter si setter pentru campul privat temperature
     public double getTemperature() {
         return this.temperature;
     }
@@ -71,6 +76,7 @@ public abstract class Air {
         this.temperature = temperature;
     }
 
+    //metode getter si setter pentru campul privat ocygenLevel
     public double getOxygenLevel() {
         return this.oxygenLevel;
     }
@@ -78,6 +84,7 @@ public abstract class Air {
         this.oxygenLevel = oxygenLevel;
     }
 
+    //metode getter si setter pentru campul privat co2Level
     public double getCo2Level() {
         return this.co2Level;
     }
@@ -85,6 +92,7 @@ public abstract class Air {
         this.co2Level = co2Level;
     }
 
+    //metode getter si setter pentru campul privat iceCrystalConcentration
     public double getIceCrystalConcentration() {
         return this.iceCrystalConcentration;
     }
@@ -92,6 +100,7 @@ public abstract class Air {
         this.iceCrystalConcentration = iceCrystalConcentration;
     }
 
+    //metode getter si setter pentru campul privat pollenLevel
     public double getPollenLevel() {
         return this.pollenLevel;
     }
@@ -99,6 +108,7 @@ public abstract class Air {
         this.pollenLevel = pollenLevel;
     }
 
+    //metode getter si setter pentru campul privat dustParticles
     public double getDustParticles() {
         return this.dustParticles;
     }
@@ -106,6 +116,7 @@ public abstract class Air {
         this.dustParticles = dustParticles;
     }
 
+    //metode getter si setter pentru campul privat altitude
     public double getAltitude() {
         return this.altitude;
     }
@@ -113,10 +124,12 @@ public abstract class Air {
         this.altitude = altitude;
     }
 
+    //metoda setter pentru campul privat temporaryQuality
     public void setTemporaryQuality(double temporaryQuality) {
         this.temporaryQuality = temporaryQuality;
     }
 
+    //metode getter si setter pentru campul privat expirationDate
     public void setExpirationTime(int currentTime) {
         this.expirationTime = currentTime + 2;
     }
@@ -124,12 +137,14 @@ public abstract class Air {
         return this.expirationTime;
     }
 
+    //metoda helper pentru normalizare
     protected double normalize(double score) {
         double normalized = Math.max(0, Math.min(100, score));
         score = Math.round(normalized * 100.0) / 100.0;
         return score;
     }
 
+    //calculeaza calitatea aerului
     protected abstract double airQuality();
     public double getQuality() {
         if (this.temporaryQuality != -1.0) {
@@ -137,9 +152,12 @@ public abstract class Air {
         }
         return airQuality();
     }
+    //returneaza scorul maxim
     protected abstract int maxScore();
+    //calculeaza noua calitate a aerului afectata de un anumit eveniment
     public abstract void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers);
 
+    //returneaza eticheta calitatii aerului
     public String qualityLabel() {
         double quality = getQuality();
         if (quality > 70.0 && quality <= 100.0) {
@@ -151,6 +169,7 @@ public abstract class Air {
         return "poor";
     }
 
+    //calculeaza toxicitatea aerului
     protected double airToxicity() {
         int maxScore = maxScore();
         double airQuality = getQuality();
@@ -163,6 +182,7 @@ public abstract class Air {
         return airToxicity();
     }
 
+    //aerul este txic sau nu?
     protected boolean isToxic() {
         int maxScore = maxScore();
         double toxicity = airToxicity();

@@ -11,12 +11,14 @@ public class DesertSoil extends Soil {
         super(name, mass);
     }
 
+    //returneaza calitatea solului in functie de fiecare tip de sol pe baza unei formule
     @Override
     protected double qualityScore() {
         double score = (getNitrogen() * 0.5) + (getWaterRetention() * 0.3) - (getSalinity() * 2);
         return normalize(score);
     }
 
+    //calculeaza probabilitatea de atac pe baza unei formule specifice fiecarui tip
     @Override
     protected double blockProbability() {
         return (100 - getWaterRetention() + getSalinity()) / 100 * 100;

@@ -25,6 +25,7 @@ public abstract class Plant {
         this.isDead = false;
     }
 
+    //metode getter si setter pt campul privat name
     public String getName() {
         return this.name;
     }
@@ -32,6 +33,7 @@ public abstract class Plant {
         this.name = name;
     }
 
+    //metode getter si setter pt campul privat mass
     public double getMass() {
         return this.mass;
     }
@@ -39,6 +41,7 @@ public abstract class Plant {
         this.mass = mass;
     }
 
+    //metode getter si setter pt campul privat type
     public String getType() {
         return this.type;
     }
@@ -46,6 +49,7 @@ public abstract class Plant {
         this.type = type;
     }
 
+    //metode getter si setter pt campul privat maturityLevel
     public String getMaturityLevel() {
         return this.maturityLevel;
     }
@@ -53,6 +57,7 @@ public abstract class Plant {
         this.maturityLevel = maturityLevel;
     }
 
+    //metode getter si setter pt campul privat maturityOxygen
     public double getMaturityOxygen() {
         return this.maturityOxygen;
     }
@@ -60,6 +65,7 @@ public abstract class Plant {
         this.maturityOxygen = maturityOxygen;
     }
 
+    //metode getter si setter pt campul privat growthLevel
     public double getGrowthLevel() {
         return this.growthLevel;
     }
@@ -67,6 +73,7 @@ public abstract class Plant {
         this.growthLevel = growthLevel;
     }
 
+    //metode getter si setter pt campul privat isDead
     public boolean getIsDead() {
         return this.isDead;
     }
@@ -74,6 +81,7 @@ public abstract class Plant {
         this.isDead = isDead;
     }
 
+    //metode getter si setter pt campul privat isScanned
     public boolean getIsScanned() {
         return this.isScanned;
     }
@@ -81,14 +89,18 @@ public abstract class Plant {
         this.isScanned = isScanned;
     }
 
+    //calculeaza probabilitatea de agatare in functie de tipul de planta
     protected abstract double hangingProbability();
-    protected abstract double oxygenFromPlant();
-    protected abstract double oxygenLevel();
-
     public double getHangingProbability() {
         return hangingProbability();
     }
 
+    //returneaza nivelul de oxigen generat de fiecare tip de planta
+    protected abstract double oxygenFromPlant();
+    //insumeaza oxigenul generat de planta cu oxigenul generat in functie de nivelul de maturitate
+    protected abstract double oxygenLevel();
+
+    //seteaza nivelul de oxigen generat de planta la o anumita perioada din viata
     protected void setMaturityRate() {
         if (maturityLevel.equals("Young") == true) {
             maturityOxygen = 0.2;
@@ -107,6 +119,7 @@ public abstract class Plant {
         }
     }
 
+    //updateaza nivelul de maturitate
     protected void growMaturity() {
         if (maturityLevel.equals("Young") == true) {
             maturityLevel = "Mature";
@@ -125,9 +138,11 @@ public abstract class Plant {
         }
     }
 
+    //planta creste cu growthLevel maxim 1.0
     protected void grow(double increaseLevel) {
         if (isDead == false) {
             growthLevel += increaseLevel;
+            //se reseteaza daca limita a fost depasita
             if (growthLevel > 1.0) {
                 growMaturity();
                 growthLevel = 0.0;

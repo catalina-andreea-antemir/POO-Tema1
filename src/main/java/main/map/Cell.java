@@ -20,6 +20,7 @@ public class Cell {
         this.soil = null;
     }
 
+    //metode getter si setter pentru campul privat Animal
     public Animal getAnimal() {
         return this.animal;
     }
@@ -27,6 +28,7 @@ public class Cell {
         this.animal = animal;
     }
 
+    //metode getter si setter pentru campul privat Plant
     public Plant getPlant() {
         return this.plant;
     }
@@ -34,6 +36,7 @@ public class Cell {
         this.plant = plant;
     }
 
+    //metode getter si setter pentru campul privat Water
     public Water getWater() {
         return this.water;
     }
@@ -41,6 +44,7 @@ public class Cell {
         this.water = water;
     }
 
+    //metode getter si setter pentru campul privat Soil
     public Soil getSoil() {
         return this.soil;
     }
@@ -48,6 +52,7 @@ public class Cell {
         this.soil = soil;
     }
 
+    //metode getter si setter pentru campul privat Air
     public Air getAir() {
         return this.air;
     }

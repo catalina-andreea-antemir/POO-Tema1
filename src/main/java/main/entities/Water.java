@@ -28,6 +28,7 @@ public class Water {
         this.isFrozen = false;
     }
 
+    //metode getter si setter pentru campul privat name
     public String getName() {
         return this.name;
     }
@@ -35,6 +36,7 @@ public class Water {
         this.name = name;
     }
 
+    //metode getter si setter pentru campul privat mass
     public double getMass() {
         return this.mass;
     }
@@ -42,6 +44,7 @@ public class Water {
         this.mass = mass;
     }
 
+    //metode getter si setter pentru campul privat type
     public String getType() {
         return this.type;
     }
@@ -97,6 +100,7 @@ public class Water {
         this.isFrozen = isFrozen;
     }
 
+    //calculeaza calitatea apei pe baza unor formule impuse
     protected double waterQuality() {
         double purityScore = purity / 100;
         double pHScore = 1 - Math.abs(pH - 7.5) / 7.5;
@@ -113,7 +117,8 @@ public class Water {
         return quality;
     }
 
-    protected String getQuality() {
+    //alege eticheta de calitate a apei pe baza valorii calitatii acesteia
+    protected String qualityLabel() {
         double quality = waterQuality();
         if (quality >= 70.0 && quality <= 100.0) {
             return "Good";

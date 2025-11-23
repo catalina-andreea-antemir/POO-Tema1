@@ -23,6 +23,7 @@ public abstract class Animal {
         this.isDead = false;
     }
 
+    //metode getter si setter pentru campul privat name
     public String getName() {
         return this.name;
     }
@@ -30,6 +31,7 @@ public abstract class Animal {
         this.name = name;
     }
 
+    //metode getter si setter pentru campul privat mass
     public double getMass() {
         return this.mass;
     }
@@ -37,6 +39,7 @@ public abstract class Animal {
         this.mass = mass;
     }
 
+    //metode getter si setter pentru campul privat type
     public String getType() {
         return this.type;
     }
@@ -44,6 +47,7 @@ public abstract class Animal {
         this.type = type;
     }
 
+    //metode getter si setter pentru campul privat status
     public String getStatus() {
         return this.status;
     }
@@ -51,6 +55,7 @@ public abstract class Animal {
         this.status = status;
     }
 
+    //metode getter si setter pentru campul privat intakeRate
     public double getIntakeRate() {
         return this.intakeRate;
     }
@@ -58,6 +63,7 @@ public abstract class Animal {
         this.intakeRate = intakeRate;
     }
 
+    //metode getter si setter pentru campul privat isScanned
     public boolean getIsScanned() {
         return this.isScanned;
     }
@@ -65,6 +71,7 @@ public abstract class Animal {
         this.isScanned = isScanned;
     }
 
+    //metode getter si setter pentru campul privat isDead
     public boolean getIsDead() {
         return this.isDead;
     }
@@ -72,6 +79,7 @@ public abstract class Animal {
         this.isDead = isDead;
     }
 
+    //verifica daca animalul poate produce ingrasamant
     public boolean canProduceFertilizer() {
         if (this.status.equals("Well-Fed")) {
             return true;
@@ -79,12 +87,14 @@ public abstract class Animal {
         return false;
     }
 
-    public abstract double attackProbability();
-    protected abstract double animalEats(Animal prey, Plant plant, Water water);
-
+    //returneaza probabilitatea de atac pe baza tipului de animal
+    protected abstract double attackProbability();
     public double getAttackProbability() {
         return attackProbability();
     }
+
+    //returneaza valoarea de organicMetter cu care animalul contribuie la sol
+    protected abstract double animalEats(Animal prey, Plant plant, Water water);
 
     public void interactionSoil(Soil soil, Animal prey, Plant plant, Water water) {
         if (soil != null && getIsScanned() && canProduceFertilizer()) {

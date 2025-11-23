@@ -15,6 +15,7 @@ public class TerraBot {
         this.battery = energyPoints;
     }
 
+    //metode getter si setter pentru compul privat x
     public int getX() {
         return this.x;
     }
@@ -22,6 +23,7 @@ public class TerraBot {
         this.x = x;
     }
 
+    //metode getter si setter pentru campul privat y
     public int getY() {
         return this.y;
     }
@@ -29,6 +31,7 @@ public class TerraBot {
         this.y = y;
     }
 
+    //metoda getter si setter pentru campul privat battery
     public int getBattery() {
         return this.battery;
     }
@@ -36,18 +39,26 @@ public class TerraBot {
         this.battery = battery;
     }
 
+    //metoda pentru comanda "moveRobot"
     public String moveRobot(MapSimulator map) {
         int desiredX = -1, desiredY = -1, bestScore = 9999;
+        //SUS
         int[] up = {this.x, this.y + 1};
+        //DREAPTA
         int[] right = {this.x + 1, this.y};
+        //JOS
         int[] down = {this.x, this.y - 1};
+        //STANGA
         int[] left = {this.x - 1, this.y};
+        //vector de directii
         int[][] dir = {up, right, down, left};
 
+        //se verifica daca robotul are destula baterie
         if (this.battery <= 0) {
             return "ERROR: Not enough battery left. Cannot perform action";
         }
         for (int i = 0; i < 4; i++) {
+            //verific daca directia surenta e in limitele matricei
             if (dir[i][0] >= 0 && dir[i][0] < map.getCols() && dir[i][1] >= 0 && dir[i][1] < map.getCols()) {
                 double probabilitySoil = 0.0;
                 double probabilityAir = 0.0;
@@ -72,10 +83,12 @@ public class TerraBot {
                     probabilityAnimal = cell.getAnimal().getAttackProbability();
                     count++;
                 }
+                //formulele din enunt
                 double sum = probabilitySoil + probabilityAir + probabilityPlant + probabilityAnimal;
                 double mean = Math.abs(sum / count);
                 int result = (int)Math.round(mean);
 
+                //se actualizeaza scorul cel mai bun si directia ideala pana in momentul acesta
                 if (result < bestScore) {
                     bestScore = result;
                     desiredX = dir[i][0];
@@ -83,9 +96,11 @@ public class TerraBot {
                 }
             }
         }
+        //robotul are destula baterie sa se mute?
         if (this.battery < bestScore) {
             return "ERROR: Not enough battery left. Cannot perform action";
         }
+        //mutam robotul
         this.x = desiredX;
         this.y = desiredY;
         this.battery -= bestScore;

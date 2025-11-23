@@ -141,7 +141,7 @@ public abstract class Air {
     public abstract void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers);
 
     public String qualityLabel() {
-        double quality = airQuality();
+        double quality = getQuality();
         if (quality > 70.0 && quality <= 100.0) {
             return "good";
         }

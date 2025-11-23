@@ -300,6 +300,7 @@ public class Simulation {
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
+                    verifyAirQualityChanging(map, commandInput);
                     if (botCharging > commandInput.getTimestamp()) {
                         ObjectNode error = objMapper.createObjectNode();
                         error.put("command", commandInput.getCommand());
@@ -345,6 +346,13 @@ public class Simulation {
                         getEnergyStatus.put("message", "TerraBot has " + bot.getBattery() + " energy points left.");
                         getEnergyStatus.put("timestamp", commandInput.getTimestamp());
                         out.add(getEnergyStatus);
+                    }
+                    if (commandInput.getCommand().equals("changeWeatherConditions")) {
+                        ObjectNode changeConditions = objMapper.createObjectNode();
+                        changeConditions.put("command", commandInput.getCommand());
+                        changeConditions.put("message", changeWeatherConditions(map, commandInput));
+                        changeConditions.put("timestamp", commandInput.getTimestamp());
+                        out.add(changeConditions);
                     }
                     if (commandInput.getCommand().equals("endSimulation")) {
                         ObjectNode end = objMapper.createObjectNode();
@@ -443,5 +451,68 @@ public class Simulation {
             out.set("air", air);
         }
         return out;
+    }
+
+    public String changeWeatherConditions(MapSimulator map, CommandInput commandInput) {
+        String type = commandInput.getType();
+        String message = "ERROR: The weather change does not affect the environment. Cannot perform action";
+
+        for (int i = 0; i < map.getCols(); i++) {
+            for (int j = 0; j < map.getRows(); j++) {
+                Cell cell = map.getCell(i, j);
+                if (cell.getAir() != null) {
+                    if (type.equals("desertStorm")) {
+                        if (cell.getAir().getType().equals("DesertAir")) {
+                            boolean desertStorm = commandInput.isDesertStorm();
+                            cell.getAir().meteorologicalEvents(-1.0, -1.0, null, desertStorm, -1);
+                            cell.getAir().setExpirationTime(commandInput.getTimestamp());
+                            message = "The weather has changed.";
+                        }
+                    } else if (type.equals("peopleHiking")) {
+                        if (cell.getAir().getType().equals("MountainAir")) {
+                            int numberOfHikers = commandInput.getNumberOfHikers();
+                            cell.getAir().meteorologicalEvents(-1.0, -1.0, null, false, numberOfHikers);
+                            cell.getAir().setExpirationTime(commandInput.getTimestamp());
+                            message = "The weather has changed.";
+                        }
+                    } else if (type.equals("newSeason")) {
+                        if (cell.getAir().getType().equals("TemperateAir")) {
+                            String season = commandInput.getSeason();
+                            cell.getAir().meteorologicalEvents(-1.0, -1.0, season, false, -1);
+                            cell.getAir().setExpirationTime(commandInput.getTimestamp());
+                            message = "The weather has changed.";
+                        }
+                    } else if (type.equals("polarStorm")) {
+                        if (cell.getAir().getType().equals("PolarAir")) {
+                            double windSpeed = commandInput.getWindSpeed();
+                            cell.getAir().meteorologicalEvents(-1.0, windSpeed, null, false, -1);
+                            cell.getAir().setExpirationTime(commandInput.getTimestamp());
+                            message = "The weather has changed.";
+                        }
+                    } else if (type.equals("rainfall")) {
+                        if (cell.getAir().getType().equals("TropicalAir")) {
+                            double rainfall = commandInput.getRainfall();
+                            cell.getAir().meteorologicalEvents(rainfall, -1.0, null, false, -1);
+                            cell.getAir().setExpirationTime(commandInput.getTimestamp());
+                            message = "The weather has changed.";
+                        }
+                    }
+                }
+            }
+        }
+        return message;
+    }
+
+    public void verifyAirQualityChanging(MapSimulator map, CommandInput commandInput) {
+        for (int i = 0; i < map.getCols(); i++) {
+            for (int j = 0; j < map.getRows(); j++) {
+                Cell cell = map.getCell(i, j);
+                if (cell.getAir() != null) {
+                    if (commandInput.getTimestamp() >= cell.getAir().getExpirationTime()) {
+                        cell.getAir().setTemporaryQuality(-1.0);
+                    }
+                }
+            }
+        }
     }
 }

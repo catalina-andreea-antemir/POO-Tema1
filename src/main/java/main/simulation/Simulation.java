@@ -282,6 +282,7 @@ public class Simulation {
     public ArrayNode runSimulation() {
         ObjectMapper objMapper = new ObjectMapper();
         ArrayNode out = objMapper.createArrayNode();
+        int botCharging = -1;
 
         for (CommandInput commandInput : commands) {
             if (commandInput.getCommand().equals("startSimulation")) {
@@ -299,6 +300,14 @@ public class Simulation {
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
+                    if (botCharging > commandInput.getTimestamp()) {
+                        ObjectNode error = objMapper.createObjectNode();
+                        error.put("command", commandInput.getCommand());
+                        error.put("message", "ERROR: Robot still charging. Cannot perform action");
+                        error.put("timestamp", commandInput.getTimestamp());
+                        out.add(error);
+                        continue;
+                    }
                     if (commandInput.getCommand().equals("printEnvConditions")) {
                         ObjectNode printEnv = objMapper.createObjectNode();
                         printEnv.put("command", commandInput.getCommand());
@@ -319,6 +328,23 @@ public class Simulation {
                         moveRobot.put("message", bot.moveRobot(map));
                         moveRobot.put("timestamp", commandInput.getTimestamp());
                         out.add(moveRobot);
+                    }
+                    if (commandInput.getCommand().equals("rechargeBattery")) {
+                        ObjectNode rechargeBattery = objMapper.createObjectNode();
+                        int timeToCharge = commandInput.getTimeToCharge();
+                        rechargeBattery.put("command", commandInput.getCommand());
+                        bot.setBattery(bot.getBattery() + timeToCharge);
+                        botCharging = commandInput.getTimestamp() + timeToCharge;
+                        rechargeBattery.put("message", "Robot battery is charging.");
+                        rechargeBattery.put("timestamp", commandInput.getTimestamp());
+                        out.add(rechargeBattery);
+                    }
+                    if (commandInput.getCommand().equals("getEnergyStatus")) {
+                        ObjectNode getEnergyStatus = objMapper.createObjectNode();
+                        getEnergyStatus.put("command", commandInput.getCommand());
+                        getEnergyStatus.put("message", "TerraBot has " + bot.getBattery() + " energy points left.");
+                        getEnergyStatus.put("timestamp", commandInput.getTimestamp());
+                        out.add(getEnergyStatus);
                     }
                     if (commandInput.getCommand().equals("endSimulation")) {
                         ObjectNode end = objMapper.createObjectNode();

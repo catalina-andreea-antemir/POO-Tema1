@@ -2,7 +2,7 @@ TerraBot - Tema1 - POO
 
 PACHETUL "ENTITIES"
 
-- Animal
+Animal
     - clasa animal este o clasa abstracta in care am retinut urmatoarele campuri:
         - name - numele animalului
         - mass - masa animalului
@@ -27,7 +27,7 @@ PACHETUL "ENTITIES"
                 - se realizeaza aceiasi pasi ca cei de mai sus doar ca se considera prada inexistenta
     - metoda getAttackProbability() returneaza rezoltatul metodei abstracte attackProbability() intrucat aceasta este protected
 
-- Plant
+Plant
     - clasa plant este o clasa abstracta in care am retinut urmatoarele campuri:
         - name - numele plantei
         - mass - masa plantei
@@ -50,7 +50,7 @@ PACHETUL "ENTITIES"
     - metoda setMaturityRate() seteaza nivelul de oxigen in functie de nivelul de maturitate al plantei
     - metoda growMaturity() actualizeaza nivelul de maturitate al plantei dupa cea aceasta a crescut pe baza metodei grow()
 
-- Water
+Water
     - clasa water contine urmatoarele campuri:
         - name - numele apei
         - mass - masa apei
@@ -66,7 +66,7 @@ PACHETUL "ENTITIES"
     - metoda waterQuality() calculeaza calitatea apei pe baza formulelor date in enunt
     - metoda getQuality() returneaza eticheta calitatii apei (Good, Moderate, Poor) pe baza calitatii apei
     
-- Soil
+Soil
     - clasa soil este o clasa abstracta ce contine urmaoarele campuri:
         - name - numele solului
         - mass - masa solului
@@ -91,7 +91,7 @@ PACHETUL "ENTITIES"
     - metodele getQuality() si getBlockPorbability() returneaza rezultatele metodelor abstracte intrucat acestea sunt de tip protected
     - metoda qualityLabel() returneaza eticheta calitatii solului pe baza valorii returnate de qualityScore()
 
-- Air
+Air
     - clasa air este o clasa abstracta care contine urmatoarele campuri:
         - name - numele aerului
         - mass - masa aerului
@@ -129,7 +129,7 @@ PACHETUL "ENTITIES"
 
 PACHETUL "MAP"
 
-- Cell
+Cell
     - clasa Cell reprezinta o celula in care poate exista un animal, o planta, o apa, un aer si un so
     - campurile sunt:
         - animal
@@ -140,7 +140,7 @@ PACHETUL "MAP"
     - constructorul clasei initializeaza toate campurile cu null intrucat se considera celula goala
     - urmeaza o serie de Getteri si Setteri pentru a accesa campurile fiind private
 
-- MapSimulator
+MapSimulator
     - aceasta clasa are rolul de a reprezenta harta simularii
     - contine urmatoarele campuri:
         - rows - numele de linii din harta
@@ -152,7 +152,7 @@ PACHETUL "MAP"
 
 PACHETUL "SIMULATION"
 
-- TerraBot
+TerraBot
     - aceasta clasa este cea pentru robot si are ca si campuri:
         - x - coordonata x
         - y - coordonata y
@@ -170,5 +170,5 @@ PACHETUL "SIMULATION"
         - daca scorul curent este mai mic decat valoarea din bestScore acesta este actualizat impreuna cu pozitia celulei cu scorul cel mai bun
         - la final, cand a fost gasita celula ideala, se verifica daca robotul are suficienta baterie sa se mute si daca are se actualizeaza campurile robotului, coordonatele si nivelul bateriei.
 
-- Simulation
+Simulation
     - 

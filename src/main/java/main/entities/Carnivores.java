@@ -27,7 +27,7 @@ public class Carnivores extends Animal{
             prey.setIsDead(true);
             entitiesEaten = 1;
         } else {
-            if (plant != null && plant.getMass() != 0.0) {
+            if (plant != null && plant.getMass() != 0.0 && plant.getIsScanned()) {
                 setMass(getMass() + plant.getMass());
                 plant.setMass(0.0);
                 plant.setIsDead(true);

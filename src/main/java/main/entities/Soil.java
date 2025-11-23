@@ -129,6 +129,9 @@ public abstract class Soil {
         return qualityScore();
     }
     protected abstract double blockProbability();
+    public double getBlockProbability() {
+        return blockProbability();
+    }
 
     public String qualityLabel() {
         double quality = qualityScore();
@@ -141,7 +144,9 @@ public abstract class Soil {
         return "poor";
     }
 
-    void addWaterRetention(double waterRetention, int iterations) {
-        this.waterRetention += waterRetention * iterations;
+    public void interactionPlant(Plant plant) {
+        if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {
+            plant.grow(0.2);
+        }
     }
 }

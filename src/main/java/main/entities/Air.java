@@ -17,6 +17,8 @@ public abstract class Air {
     private double pollenLevel;
     private double dustParticles;
     private double altitude;
+    private double temporaryQuality;
+    private int expirationTime;
 
     public Air(String name, double mass) {
         this.name = name;
@@ -30,6 +32,8 @@ public abstract class Air {
         this.pollenLevel = 0.0;
         this.dustParticles = 0.0;
         this.altitude = 0.0;
+        this.temporaryQuality = -1.0;
+        this.expirationTime = -1;
     }
 
     public String getName() {
@@ -98,7 +102,7 @@ public abstract class Air {
     public double getDustParticles() {
         return this.dustParticles;
     }
-        public void setDustParticles(double dustParticles) {
+    public void setDustParticles(double dustParticles) {
         this.dustParticles = dustParticles;
     }
 
@@ -109,6 +113,17 @@ public abstract class Air {
         this.altitude = altitude;
     }
 
+    public void setTemporaryQuality(double temporaryQuality) {
+        this.temporaryQuality = temporaryQuality;
+    }
+
+    public void setExpirationTime(int currentTime) {
+        this.expirationTime = currentTime + 2;
+    }
+    public int getExpirationTime() {
+        return this.expirationTime;
+    }
+
     protected double normalize(double score) {
         double normalized = Math.max(0, Math.min(100, score));
         score = Math.round(normalized * 100.0) / 100.0;
@@ -117,10 +132,13 @@ public abstract class Air {
 
     protected abstract double airQuality();
     public double getQuality() {
+        if (this.temporaryQuality != -1.0) {
+            return this.temporaryQuality;
+        }
         return airQuality();
     }
     protected abstract int maxScore();
-    protected abstract double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers);
+    public abstract void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers);
 
     public String qualityLabel() {
         double quality = airQuality();
@@ -135,11 +153,14 @@ public abstract class Air {
 
     protected double airToxicity() {
         int maxScore = maxScore();
-        double airQuality = airQuality();
+        double airQuality = getQuality();
         double toxicity = 100 * (1 - airQuality / maxScore);
         toxicity = Math.max(0, Math.min(100, toxicity));
         toxicity = Math.round(toxicity * 100.0) / 100.0;
         return toxicity;
+    }
+    public double getToxicProbability() {
+        return airToxicity();
     }
 
     protected boolean isToxic() {
@@ -149,5 +170,13 @@ public abstract class Air {
             return true;
         }
         return false;
+    }
+
+    public void interactionAnimal(Animal animal) {
+        if (animal != null && animal.getIsScanned() && !animal.getIsDead()) {
+            if (isToxic()) {
+                animal.setStatus("Sick");
+            }
+        }
     }
 }

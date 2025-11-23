@@ -22,14 +22,13 @@ public class Temperate extends Air {
     }
 
     @Override
-    protected double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
+    public void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
         double quality = airQuality();
         int seasonPenalty = 0;
         if (newSeason.equalsIgnoreCase("Spring")) {
             seasonPenalty = 15;
         }
         quality -= seasonPenalty;
-        normalize(quality);
-        return quality;
+        setTemporaryQuality(normalize(quality));
     }
 }

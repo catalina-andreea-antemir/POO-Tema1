@@ -47,7 +47,6 @@ public abstract class Animal {
     public String getStatus() {
         return this.status;
     }
-
     public void setStatus(String status) {
         this.status = status;
     }
@@ -55,7 +54,6 @@ public abstract class Animal {
     public double getIntakeRate() {
         return this.intakeRate;
     }
-
     public void setIntakeRate(double intakeRate) {
         this.intakeRate = intakeRate;
     }
@@ -63,7 +61,6 @@ public abstract class Animal {
     public boolean getIsScanned() {
         return this.isScanned;
     }
-
     public void setIsScanned(boolean isScanned) {
         this.isScanned = isScanned;
     }
@@ -71,7 +68,6 @@ public abstract class Animal {
     public boolean getIsDead() {
         return this.isDead;
     }
-
     public void setIsDead(boolean isDead) {
         this.isDead = isDead;
     }
@@ -84,6 +80,15 @@ public abstract class Animal {
     }
 
     public abstract double attackProbability();
+    protected abstract double animalEats(Animal prey, Plant plant, Water water);
 
-    protected abstract double animalEats( Animal prey, Plant plant, Water water);
+    public double getAttackProbability() {
+        return attackProbability();
+    }
+
+    public void interactionSoil(Soil soil, Animal prey, Plant plant, Water water) {
+        if (soil != null && getIsScanned() && canProduceFertilizer()) {
+            soil.setOrganicMatter(soil.getOrganicMatter() + animalEats(prey, plant, water));
+        }
+    }
 }

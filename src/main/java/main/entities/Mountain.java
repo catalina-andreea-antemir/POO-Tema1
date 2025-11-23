@@ -23,10 +23,9 @@ public class Mountain extends Air {
     }
 
     @Override
-    protected double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
+    public void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
         double quality = airQuality();
         quality -= numberOfHikers * 0.1;
-        normalize(quality);
-        return quality;
+        setTemporaryQuality(normalize(quality));
     }
 }

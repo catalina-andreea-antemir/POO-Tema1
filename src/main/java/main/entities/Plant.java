@@ -11,6 +11,7 @@ public abstract class Plant {
     private String maturityLevel;
     private double maturityOxygen;
     private double growthLevel;
+    private boolean isScanned;
     private boolean isDead;
 
     public Plant(String name, double mass) {
@@ -20,6 +21,7 @@ public abstract class Plant {
         this.maturityLevel = "Young";
         this.maturityOxygen = 0.0;
         this.growthLevel = 0.0;
+        this.isScanned = false;
         this.isDead = false;
     }
 
@@ -72,9 +74,20 @@ public abstract class Plant {
         this.isDead = isDead;
     }
 
+    public boolean getIsScanned() {
+        return this.isScanned;
+    }
+    public void setIsScanned(boolean isScanned) {
+        this.isScanned = isScanned;
+    }
+
     protected abstract double hangingProbability();
     protected abstract double oxygenFromPlant();
     protected abstract double oxygenLevel();
+
+    public double getHangingProbability() {
+        return hangingProbability();
+    }
 
     protected void setMaturityRate() {
         if (maturityLevel.equals("Young") == true) {
@@ -119,6 +132,12 @@ public abstract class Plant {
                 growMaturity();
                 growthLevel = 0.0;
             }
+        }
+    }
+
+    public void interactionAir(Air air) {
+        if (air != null && !getIsDead() && getIsScanned()) {
+            air.setOxygenLevel(air.getOxygenLevel() + oxygenLevel());
         }
     }
 }

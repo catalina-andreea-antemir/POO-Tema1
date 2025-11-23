@@ -15,6 +15,7 @@ public class Simulation {
     private int cols;
     private int energyPoints;
     private MapSimulator map;
+    private TerraBot bot;
     private List<CommandInput> commands;
     private boolean started;
 
@@ -25,7 +26,8 @@ public class Simulation {
         this.cols = Integer.parseInt(dims[0]);
         this.rows = Integer.parseInt(dims[1]);
         this.energyPoints = simulation.getEnergyPoints();
-        this.map = new MapSimulator(rows, cols);
+        this.map = new MapSimulator(cols, rows);
+        this.bot = new TerraBot(this.energyPoints);
         this.started = false;
 
         populate(simulation.getTerritorySectionParams());
@@ -35,31 +37,31 @@ public class Simulation {
         for (AnimalInput animalInput : params.getAnimals()) {
             for (PairInput pair : animalInput.getSections()) {
                 Animal animal = initAnimal(animalInput);
-                map.getCell(pair.getY(), pair.getX()).setAnimal(animal);
+                map.getCell(pair.getX(), pair.getY()).setAnimal(animal);
             }
         }
         for (PlantInput plantInput : params.getPlants()) {
             for (PairInput pair : plantInput.getSections()) {
                 Plant plant = initPlant(plantInput);
-                map.getCell(pair.getY(), pair.getX()).setPlant(plant);
+                map.getCell(pair.getX(), pair.getY()).setPlant(plant);
             }
         }
         for (WaterInput waterInput : params.getWater()) {
             for (PairInput pair : waterInput.getSections()) {
                 Water water = initWater(waterInput);
-                map.getCell(pair.getY(), pair.getX()).setWater(water);
+                map.getCell(pair.getX(), pair.getY()).setWater(water);
             }
         }
         for (SoilInput soilInput : params.getSoil()) {
             for (PairInput pair : soilInput.getSections()) {
                 Soil soil = initSoil(soilInput);
-                map.getCell(pair.getY(), pair.getX()).setSoil(soil);
+                map.getCell(pair.getX(), pair.getY()).setSoil(soil);
             }
         }
         for (AirInput airInput : params.getAir()) {
             for (PairInput pair : airInput.getSections()) {
                 Air air = initAir(airInput);
-                map.getCell(pair.getY(), pair.getX()).setAir(air);
+                map.getCell(pair.getX(), pair.getY()).setAir(air);
             }
         }
     }
@@ -285,52 +287,60 @@ public class Simulation {
             if (commandInput.getCommand().equals("startSimulation")) {
                 started = true;
                 ObjectNode start = objMapper.createObjectNode();
-                start.put("command", "startSimulation");
+                start.put("command", commandInput.getCommand());
                 start.put("message", "Simulation has started.");
                 start.put("timestamp", commandInput.getTimestamp());
                 out.add(start);
             } else {
-                if (!started && !commandInput.getCommand().equals("startSimulation")) {
+                if (!started) {
                     ObjectNode error = objMapper.createObjectNode();
                     error.put("command", commandInput.getCommand());
                     error.put("message", "ERROR: Simulation not started. Cannot perform action");
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
-                    if (started) {
-                        if (commandInput.getCommand().equals("printEnvConditions")) {
-                            ObjectNode printEnv = objMapper.createObjectNode();
-                            printEnv.put("command", "printEnvConditions");
-                            printEnv.put("output", envCond(map.getCell(0, 0)));
-                            printEnv.put("timestamp", commandInput.getTimestamp());
-                            out.add(printEnv);
-                        }
-                        if (commandInput.getCommand().equals("printMap")) {
-                            ObjectNode printMap = objMapper.createObjectNode();
-                            printMap.put("command", "printMap");
-                            printMap.put("output", mapPrint());
-                            printMap.put("timestamp", commandInput.getTimestamp());
-                            out.add(printMap);
-                        }
-                        if (commandInput.getCommand().equals("endSimulation")) {
-                            ObjectNode end = objMapper.createObjectNode();
-                            end.put("command", "endSimulation");
-                            end.put("message", "Simulation has ended.");
-                            end.put("timestamp", commandInput.getTimestamp());
-                            started = false;
-                            out.add(end);
-                        }
+                    if (commandInput.getCommand().equals("printEnvConditions")) {
+                        ObjectNode printEnv = objMapper.createObjectNode();
+                        printEnv.put("command", commandInput.getCommand());
+                        printEnv.put("output", envCond(map.getCell(bot.getX(), bot.getY()), commandInput));
+                        printEnv.put("timestamp", commandInput.getTimestamp());
+                        out.add(printEnv);
+                    }
+                    if (commandInput.getCommand().equals("printMap")) {
+                        ObjectNode printMap = objMapper.createObjectNode();
+                        printMap.put("command", commandInput.getCommand());
+                        printMap.put("output", map.mapPrint());
+                        printMap.put("timestamp", commandInput.getTimestamp());
+                        out.add(printMap);
+                    }
+                    if (commandInput.getCommand().equals("moveRobot")) {
+                        ObjectNode moveRobot = objMapper.createObjectNode();
+                        moveRobot.put("command", commandInput.getCommand());
+                        moveRobot.put("message", bot.moveRobot(map));
+                        moveRobot.put("timestamp", commandInput.getTimestamp());
+                        out.add(moveRobot);
+                    }
+                    if (commandInput.getCommand().equals("endSimulation")) {
+                        ObjectNode end = objMapper.createObjectNode();
+                        end.put("command", commandInput.getCommand());
+                        end.put("message", "Simulation has ended.");
+                        end.put("timestamp", commandInput.getTimestamp());
+                        started = false;
+                        out.add(end);
                     }
                 }
             }
         }
-
         return out;
     }
 
-    public ObjectNode envCond(Cell cell) {
+    public ObjectNode envCond(Cell cell, CommandInput commandInput) {
         ObjectMapper objMapper = new ObjectMapper();
         ObjectNode out = objMapper.createObjectNode();
+        boolean desertStorm = false;
+        if (cell.getAir().getExpirationTime() > commandInput.getTimestamp()) {
+            desertStorm = true;
+        }
 
         if (cell.getSoil() != null) {
             ObjectNode soil = objMapper.createObjectNode();
@@ -399,52 +409,12 @@ public class Simulation {
                 air.put("pollenLevel", cell.getAir().getPollenLevel());
             }
             if (cell.getAir().getType().equals("DesertAir")) {
-                air.put("dustParticles", cell.getAir().getDustParticles());
+                air.put("desertStorm", desertStorm);
             }
             if (cell.getAir().getType().equals("MountainAir")) {
                 air.put("altitude", cell.getAir().getAltitude());
             }
             out.set("air", air);
-        }
-        return out;
-    }
-
-    public ArrayNode mapPrint() {
-        ObjectMapper objMapper = new ObjectMapper();
-        ArrayNode out = objMapper.createArrayNode();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                Cell cell = map.getCell(i, j);
-                ObjectNode node = objMapper.createObjectNode();
-                ArrayNode section = objMapper.createArrayNode();
-                section.add(j);
-                section.add(i);
-                node.set("section", section);
-
-                int numberObj = 0;
-                if (cell.getAnimal() != null && cell.getAnimal().getMass() > 0.0) {
-                    numberObj++;
-                }
-                if (cell.getPlant() != null && cell.getPlant().getMass() > 0.0) {
-                    numberObj++;
-                }
-                if (cell.getWater() != null && cell.getWater().getMass() > 0.0) {
-                    numberObj++;
-                }
-
-                node.put("totalNrOfObjects", numberObj);
-                if (cell.getAir() != null) {
-                    node.put("airQuality", cell.getAir().qualityLabel());
-                } else {
-                    node.put("airQuality", "");
-                }
-                if (cell.getSoil() != null) {
-                    node.put("soilQuality", cell.getSoil().qualityLabel());
-                } else {
-                    node.put("soilQuality", "");
-                }
-                out.add(node);
-            }
         }
         return out;
     }

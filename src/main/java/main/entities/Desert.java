@@ -23,12 +23,11 @@ public class Desert extends Air {
     }
 
     @Override
-    protected double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
+    public void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
         double quality = airQuality();
         if (desertStorm) {
             quality -= 30;
         }
-        quality = normalize(quality);
-        return quality;
+        setTemporaryQuality(normalize(quality));
     }
 }

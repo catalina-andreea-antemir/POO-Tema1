@@ -124,10 +124,21 @@ public class Water {
         return "Poor";
     }
 
-    protected boolean isEmpty() {
-        if (mass <= 0) {
-            return true;
+    public void interactionSoil(Soil soil) {
+        if (soil != null) {
+            soil.setWaterRetention(soil.getWaterRetention() + 0.1);
         }
-        return false;
+    }
+
+    public void interactionAir(Air air) {
+        if (air != null) {
+            air.setHumidity(air.getHumidity() + 0.1);
+        }
+    }
+
+    public void interactionPlant(Plant plant) {
+        if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {
+            plant.grow(0.2);
+        }
     }
 }

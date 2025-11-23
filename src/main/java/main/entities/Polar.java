@@ -22,10 +22,9 @@ public class Polar extends Air {
     }
 
     @Override
-    protected double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
+    public void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
         double quality = airQuality();
         quality -= windSpeed * 0.2;
-        normalize(quality);
-        return quality;
+        setTemporaryQuality(normalize(quality));
     }
 }

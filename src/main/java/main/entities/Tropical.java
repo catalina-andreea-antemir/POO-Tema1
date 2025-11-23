@@ -23,10 +23,9 @@ public class Tropical extends Air {
     }
 
     @Override
-    protected double meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
+    public void meteorologicalEvents(double rainfall, double windSpeed, String newSeason, boolean desertStorm, int numberOfHikers) {
         double quality = airQuality();
         quality += rainfall * 0.3;
-        normalize(quality);
-        return quality;
+        setTemporaryQuality(normalize(quality));
     }
 }

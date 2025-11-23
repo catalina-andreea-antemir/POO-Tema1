@@ -22,7 +22,7 @@ public class Herbivores extends Animal{
         int entitiesEaten = 0;
         double organicMatter;
         if (prey == null) {
-            if (plant != null && plant.getMass() != 0.0) {
+            if (plant != null && plant.getMass() != 0.0 && plant.getIsScanned()) {
                 setMass(getMass() + plant.getMass());
                 plant.setMass(0.0);
                 plant.setIsDead(true);

@@ -37,6 +37,8 @@ public class Simulation {
         for (AnimalInput animalInput : params.getAnimals()) {
             for (PairInput pair : animalInput.getSections()) {
                 Animal animal = initAnimal(animalInput);
+                animal.setX(pair.getX());
+                animal.setY(pair.getY());
                 map.getCell(pair.getX(), pair.getY()).setAnimal(animal);
             }
         }
@@ -300,7 +302,7 @@ public class Simulation {
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
-                    verifyAirQualityChanging(map, commandInput);
+                    entitiesInteractions(map, commandInput);
                     if (botCharging > commandInput.getTimestamp()) {
                         ObjectNode error = objMapper.createObjectNode();
                         error.put("command", commandInput.getCommand());
@@ -353,6 +355,13 @@ public class Simulation {
                         changeConditions.put("message", changeWeatherConditions(map, commandInput));
                         changeConditions.put("timestamp", commandInput.getTimestamp());
                         out.add(changeConditions);
+                    }
+                    if (commandInput.getCommand().equals("scanObject")) {
+                        ObjectNode scanObject = objMapper.createObjectNode();
+                        scanObject.put("command", commandInput.getCommand());
+                        scanObject.put("message", bot.scanObject(commandInput, map.getCell(bot.getX(), bot.getY())));
+                        scanObject.put("timestamp", commandInput.getTimestamp());
+                        out.add(scanObject);
                     }
                     if (commandInput.getCommand().equals("endSimulation")) {
                         ObjectNode end = objMapper.createObjectNode();
@@ -503,7 +512,7 @@ public class Simulation {
         return message;
     }
 
-    public void verifyAirQualityChanging(MapSimulator map, CommandInput commandInput) {
+    public void entitiesInteractions(MapSimulator map, CommandInput commandInput) {
         for (int i = 0; i < map.getCols(); i++) {
             for (int j = 0; j < map.getRows(); j++) {
                 Cell cell = map.getCell(i, j);
@@ -511,8 +520,62 @@ public class Simulation {
                     if (commandInput.getTimestamp() >= cell.getAir().getExpirationTime()) {
                         cell.getAir().setTemporaryQuality(-1.0);
                     }
+                    if (cell.getAnimal() != null) {
+                        cell.getAir().interactionAnimal(cell.getAnimal());
+                    }
+                }
+                if (cell.getSoil() != null && cell.getPlant() != null) {
+                    if (cell.getPlant().getIsScanned() && !cell.getPlant().getIsDead()) {
+                        cell.getSoil().interactionPlant(cell.getPlant());
+                    }
+                }
+                if (cell.getWater() != null && cell.getWater().getIsScanned()) {
+                    if (cell.getAir() != null) {
+                        if (commandInput.getTimestamp() >= cell.getWater().getAirExpirationTime()) {
+                            cell.getWater().interactionAir(cell.getAir());
+                            cell.getWater().setAirExpirationTime(commandInput.getTimestamp());
+                        }
+                    }
+                    if (cell.getSoil() != null) {
+                        if (commandInput.getTimestamp() >= cell.getWater().getSoilExpirationTime()) {
+                            cell.getWater().interactionSoil(cell.getSoil());
+                            cell.getWater().setSoilExpirationTime(commandInput.getTimestamp());
+                        }
+                    }
+                    if (cell.getPlant() != null && cell.getPlant().getIsScanned() && !cell.getPlant().getIsDead()) {
+                        cell.getWater().interactionPlant(cell.getPlant());
+                    }
+                }
+                if (cell.getPlant() != null && cell.getAir() != null) {
+                    cell.getPlant().interactionAir(cell.getAir());
+                }
+                if (cell.getAnimal() != null && cell.getAnimal().getIsScanned() && !cell.getAnimal().getIsDead()) {
+                    Plant plant = null;
+                    Water water = null;
+                    if (cell.getPlant() != null && cell.getPlant().getIsScanned()) {
+                        plant = cell.getPlant();
+                    }
+                    if (cell.getWater() != null && cell.getWater().getIsScanned()) {
+                        water = cell.getWater();
+                    }
+                    cell.getAnimal().animalEats(null, plant, water);
+                    if (cell.getSoil() != null && cell.getAnimal().canProduceFertilizer()) {
+                        cell.getAnimal().interactionSoil(cell.getSoil());
+                    }
                 }
             }
+        }
+        List<Animal> animalsToMove = new ArrayList<>();
+        for (int i = 0; i < map.getCols(); i++) {
+            for (int j = 0; j < map.getRows(); j++) {
+                Cell cell = map.getCell(i, j);
+                if (cell.getAnimal() != null && cell.getAnimal().getIsScanned() && !cell.getAnimal().getIsDead()) {
+                    animalsToMove.add(cell.getAnimal());
+                }
+            }
+        }
+        for (Animal animal : animalsToMove) {
+            animal.moveAnimal(map, commandInput.getTimestamp());
         }
     }
 }

@@ -5,9 +5,7 @@ import main.entities.Air;
 import main.entities.Soil;
 import fileio.WaterInput;
 
-public class Water {
-    private String name;
-    private double mass;
+public class Water extends Entities {
     private String type;
     private double salinity;
     private double pH;
@@ -15,10 +13,12 @@ public class Water {
     private double turbidity;
     private double contaminantIndex;
     private boolean isFrozen;
+    private boolean isScanned;
+    private int airExpirationTime;
+    private int soilExpirationTime;
 
     public Water(String name, double mass) {
-        this.name = name;
-        this.mass = mass;
+        super(name, mass);
         this.type = null;
         this.salinity = 0.0;
         this.pH = 0.0;
@@ -26,22 +26,9 @@ public class Water {
         this.turbidity = 0.0;
         this.contaminantIndex = 0.0;
         this.isFrozen = false;
-    }
-
-    //metode getter si setter pentru campul privat name
-    public String getName() {
-        return this.name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    //metode getter si setter pentru campul privat mass
-    public double getMass() {
-        return this.mass;
-    }
-    public void setMass(double mass) {
-        this.mass = mass;
+        this.isScanned = false;
+        this.airExpirationTime = -1;
+        this.soilExpirationTime = -1;
     }
 
     //metode getter si setter pentru campul privat type
@@ -100,8 +87,32 @@ public class Water {
         this.isFrozen = isFrozen;
     }
 
+    //getter si setter pentru campul privat "isScanned"
+    public boolean getIsScanned() {
+        return this.isScanned;
+    }
+    public void setIsScanned(boolean isScanned) {
+        this.isScanned = isScanned;
+    }
+
+    //getter si setter pentru campul private airExpirationTime
+    public int getAirExpirationTime() {
+        return this.airExpirationTime;
+    }
+    public void setAirExpirationTime(int currentTime) {
+        this.airExpirationTime = currentTime + 2;
+    }
+
+    //getter si setter pentru camppul private soilExpirationTime
+    public int getSoilExpirationTime() {
+        return this.soilExpirationTime;
+    }
+    public void setSoilExpirationTime(int currentTime) {
+        this.soilExpirationTime = currentTime + 2;
+    }
+
     //calculeaza calitatea apei pe baza unor formule impuse
-    protected double waterQuality() {
+    public double waterQuality() {
         double purityScore = purity / 100;
         double pHScore = 1 - Math.abs(pH - 7.5) / 7.5;
         double salinityScore = 1 - (salinity / 350);
@@ -129,18 +140,27 @@ public class Water {
         return "Poor";
     }
 
+    //interactiunea Water - Soil (apa creste waterRetention din sol cu 0.1 la fiecare doua iteratii)
     public void interactionSoil(Soil soil) {
         if (soil != null) {
-            soil.setWaterRetention(soil.getWaterRetention() + 0.1);
+            double val = soil.getWaterRetention() + 0.1;
+            //rotunjim valoarea la doua zecimale
+            val = Math.round(val * 100.0) / 100.0;
+            soil.setWaterRetention(val);
         }
     }
 
+    //interactiunea Water - Air (apa creste umiditatea din aer cu 0.1 odata la doua iteratii)
     public void interactionAir(Air air) {
         if (air != null) {
-            air.setHumidity(air.getHumidity() + 0.1);
+            double val = air.getHumidity() + 0.1;
+            //rotunjim la doua zecimale
+            val = Math.round(val * 100.0) / 100.0;
+            air.setHumidity(val);
         }
     }
 
+    //interactiunea Water - Plant (apa creste planta cu 0.2)
     public void interactionPlant(Plant plant) {
         if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {
             plant.grow(0.2);

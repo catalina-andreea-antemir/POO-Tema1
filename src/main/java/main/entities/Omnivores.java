@@ -20,11 +20,10 @@ public class Omnivores extends Animal{
         return attackProbability;
     }
 
-    //returneaza organicMatter in functie de cate entitati consuma animalul
+    //calculeaza organicMatter in functie de cate entitati consuma animalul
     @Override
-    protected double animalEats(Animal prey, Plant plant, Water water) {
+    public void animalEats(Animal prey, Plant plant, Water water) {
         int entitiesEaten = 0;
-        double organicMatter;
         if (prey == null) {
             if (plant != null && plant.getMass() != 0.0 && plant.getIsScanned()) {
                 setMass(getMass() + plant.getMass()); //se adauga la masa
@@ -42,18 +41,17 @@ public class Omnivores extends Animal{
         }
         //daca mananca planta si apa
         if (entitiesEaten == 2) {
-            organicMatter = 0.8;
+            setOrganicMetter(0.8);
             setStatus("Well-Fed");
         } else {
             //daca mananca ori planta, ori apa
             if (entitiesEaten == 1) {
-                organicMatter = 0.5;
+                setOrganicMetter(0.5);
                 setStatus("Well-Fed");
             } else {
-                organicMatter = 0.0;
+                setOrganicMetter(0.0);
                 setStatus("Hungry");
             }
         }
-        return organicMatter;
     }
 }

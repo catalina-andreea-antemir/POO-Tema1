@@ -1,13 +1,8 @@
 package main.entities;
-import main.entities.Plant;
-import main.entities.Animal;
-import main.entities.Water;
-import main.entities.Soil;
+import main.entities.*;
 import fileio.AirInput;
 
-public abstract class Air {
-    private String name;
-    private double mass;
+public abstract class Air extends Entities {
     private String type;
     private double humidity;
     private double temperature;
@@ -21,8 +16,7 @@ public abstract class Air {
     private int expirationTime;
 
     public Air(String name, double mass) {
-        this.name = name;
-        this.mass = mass;
+        super(name, mass); //se apeleaza construtorul parintelui
         this.type = null;
         this.humidity = 0.0;
         this.temperature = 0.0;
@@ -34,22 +28,6 @@ public abstract class Air {
         this.altitude = 0.0;
         this.temporaryQuality = -1.0;
         this.expirationTime = -1;
-    }
-
-    //metode getter si setter pentru campul privat name
-    public String getName() {
-        return this.name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    //metode getter si setter pentru campul privat mass
-    public double getMass() {
-        return this.mass;
-    }
-    public void setMass(double mass) {
-        this.mass = mass;
     }
 
     //metode getter si setter pentru campul privat type
@@ -192,6 +170,7 @@ public abstract class Air {
         return false;
     }
 
+    //interactiunea Air - Animal (daca aerul e toxic animalul devine Sick)
     public void interactionAnimal(Animal animal) {
         if (animal != null && animal.getIsScanned() && !animal.getIsDead()) {
             if (isToxic()) {

@@ -59,4 +59,6 @@ public class Cell {
     public void setAir(Air air) {
         this.air = air;
     }
+
+
 }

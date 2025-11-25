@@ -5,9 +5,7 @@ import main.entities.Water;
 import main.entities.Air;
 import fileio.SoilInput;
 
-public abstract class Soil {
-    private String name;
-    private double mass;
+public abstract class Soil extends Entities {
     private String type;
     private double nitrogen;
     private double waterRetention;
@@ -20,8 +18,7 @@ public abstract class Soil {
     private double salinity;
 
     public Soil(String name, double mass) {
-        this.name = name;
-        this.mass = mass;
+        super(name, mass); //se apeleaza constructorul parintelui
         this.type = null;
         this.nitrogen = 0.0;
         this.waterRetention = 0.0;
@@ -32,22 +29,6 @@ public abstract class Soil {
         this.rootDensity = 0.0;
         this.permafrostDepth = 0.0;
         this.salinity = 0.0;
-    }
-
-    //metode getter si setter pentru campul privat name
-    public String getName() {
-        return this.name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    //metode getter si setter pentru campul privat mass
-    public double getMass() {
-        return this.mass;
-    }
-    public void setMass(double mass) {
-        this.mass = mass;
     }
 
     //metode getter si setter pentru campul privat type
@@ -161,6 +142,7 @@ public abstract class Soil {
         return "poor";
     }
 
+    //interactiunea Soil - Plant (solul face planta sa creasca cu 0.2)
     public void interactionPlant(Plant plant) {
         if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {
             plant.grow(0.2);

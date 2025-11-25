@@ -19,11 +19,10 @@ public class Carnivores extends Animal{
         return attackProbability;
     }
 
-    //returneaza organicMatter in functie de cate entitati consuma animalul
+    //calculeaza organicMatter in functie de cate entitati consuma animalul
     @Override
-    protected double animalEats(Animal prey, Plant plant, Water water) {
+    public void animalEats(Animal prey, Plant plant, Water water) {
         int entitiesEaten = 0;
-        double organicMatter;
         //animalele carnivore pot consuma alte animale
         if (prey != null && prey.getMass() != 0.0) {
             setMass(getMass() + prey.getMass()); //se adauga la masa
@@ -49,18 +48,17 @@ public class Carnivores extends Animal{
         }
         //daca mananca planta si apa
         if (entitiesEaten == 2) {
-            organicMatter = 0.8;
+            setOrganicMetter(0.8);
             setStatus("Well-Fed");
         } else {
             //ddaca mananca ori prada, ori planta, ori apa
             if (entitiesEaten == 1) {
-                organicMatter = 0.5;
+                setOrganicMetter(0.5);
                 setStatus("Well-Fed");
             } else {
-                organicMatter = 0.0;
+                setOrganicMetter(0.0);
                 setStatus("Hungry");
             }
         }
-        return organicMatter;
     }
 }

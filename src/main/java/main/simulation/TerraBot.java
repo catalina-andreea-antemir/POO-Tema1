@@ -1,18 +1,22 @@
 package main.simulation;
 
+import fileio.CommandInput;
 import main.map.*;
 import main.simulation.*;
 import main.entities.*;
+import java.util.*;
 
 public class TerraBot {
     private int x;
     private int y;
     private int battery;
+    private List<Entities> inventory;
 
     public TerraBot(int energyPoints) {
         this.x = 0;
         this.y = 0;
         this.battery = energyPoints;
+        this.inventory = new ArrayList<>();
     }
 
     //metode getter si setter pentru compul privat x
@@ -37,6 +41,14 @@ public class TerraBot {
     }
     public void setBattery(int battery) {
         this.battery = battery;
+    }
+
+    //metode getter si setter pentru campul private inventory
+    public List<Entities> getInventory() {
+        return this.inventory;
+    }
+    public void setInventory(List<Entities> inventory) {
+        this.inventory = inventory;
     }
 
     //metoda pentru comanda "moveRobot"
@@ -105,5 +117,54 @@ public class TerraBot {
         this.y = desiredY;
         this.battery -= bestScore;
         return "The robot has successfully moved to position (" + this.x + ", " + this.y + ").";
+    }
+
+    //metoda pentru comanda "scanObject"
+    public String scanObject(CommandInput commandInput, Cell cell) {
+        //costul mutarii este de 7 energyPoints; daca nu ajunge bateria robotul nu scaneaza
+        if (this.battery < 7) {
+            return "ERROR: Not enough battery left. Cannot perform action";
+        }
+        String object = "";
+        String color = commandInput.getColor();
+        String smell = commandInput.getSmell();
+        String sound = commandInput.getSound();
+
+        //obiectul apa (none none none)
+        if (color.equals("none") && smell.equals("none") && sound.equals("none")) {
+            object = "water";
+            //obiectul planta (!none !none none)
+        } else if (!color.equals("none") && !smell.equals("none") && sound.equals("none")) {
+            object = "plant";
+            //obiectul animal (!none !none !none)
+        } else if (!color.equals("none") && !smell.equals("none") && !sound.equals("none")) {
+            object = "animal";
+        }
+
+        //daca nu a scanat planta o scaneaza, scade energyPoints si o adauga in inventar
+        if (object.equals("plant") && cell.getPlant() != null && !cell.getPlant().getIsScanned()) {
+            this.battery -= 7;
+            cell.getPlant().setIsScanned(true);
+            inventory.add(cell.getPlant());
+            return "The scanned object is a " + object + ".";
+        }
+        //daca nu a scanat animalul il scaneaza, scade energyPoints si il adauga in inventar
+        if (object.equals("animal") && cell.getAnimal() != null && !cell.getAnimal().getIsScanned()) {
+            this.battery -= 7;
+            cell.getAnimal().setIsScanned(true);
+            cell.getAnimal().setExpirationTime(commandInput.getTimestamp());
+            inventory.add(cell.getAnimal());
+            return "The scanned object is an " + object + ".";
+        }
+        //daca nu a scanat apa, o scaneaza, o adauga in inentar si scade energyPoints
+        if (object.equals("water") && cell.getWater() != null && !cell.getWater().getIsScanned()) {
+            this.battery -= 7;
+            cell.getWater().setIsScanned(true);
+            cell.getWater().setAirExpirationTime(commandInput.getTimestamp());
+            cell.getWater().setSoilExpirationTime(commandInput.getTimestamp());
+            inventory.add(cell.getWater());
+            return "The scanned object is " + object + ".";
+        }
+        return "ERROR: Object not found. Cannot perform action";
     }
 }

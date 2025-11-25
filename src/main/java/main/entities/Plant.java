@@ -4,9 +4,7 @@ import main.entities.Animal;
 import main.entities.Air;
 import main.entities.Soil;
 
-public abstract class Plant {
-    private String name;
-    private double mass;
+public abstract class Plant extends Entities {
     public String type;
     private String maturityLevel;
     private double maturityOxygen;
@@ -15,30 +13,13 @@ public abstract class Plant {
     private boolean isDead;
 
     public Plant(String name, double mass) {
-        this.name = name;
-        this.mass = mass;
+        super(name, mass); //se apeleaza constructorul parintelui
         this.type = null;
         this.maturityLevel = "Young";
-        this.maturityOxygen = 0.0;
+        this.maturityOxygen = 0.2;
         this.growthLevel = 0.0;
         this.isScanned = false;
         this.isDead = false;
-    }
-
-    //metode getter si setter pt campul privat name
-    public String getName() {
-        return this.name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    //metode getter si setter pt campul privat mass
-    public double getMass() {
-        return this.mass;
-    }
-    public void setMass(double mass) {
-        this.mass = mass;
     }
 
     //metode getter si setter pt campul privat type
@@ -143,16 +124,20 @@ public abstract class Plant {
         if (isDead == false) {
             growthLevel += increaseLevel;
             //se reseteaza daca limita a fost depasita
-            if (growthLevel > 1.0) {
+            if (growthLevel >= 1.0) {
                 growMaturity();
                 growthLevel = 0.0;
             }
         }
     }
 
+    //interactiunea Plant - Air (oxigenul din aer creste cu oxigenul produs de planta)
     public void interactionAir(Air air) {
         if (air != null && !getIsDead() && getIsScanned()) {
-            air.setOxygenLevel(air.getOxygenLevel() + oxygenLevel());
+            double newOxygenLevel = air.getOxygenLevel() + oxygenLevel();
+            //rotunjum la doua zecimale
+            newOxygenLevel = Math.round(newOxygenLevel * 100.0) / 100.0;
+            air.setOxygenLevel(newOxygenLevel);
         }
     }
 }

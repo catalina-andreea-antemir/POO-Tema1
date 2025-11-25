@@ -11,12 +11,14 @@ public class TerraBot {
     private int y;
     private int battery;
     private List<Entities> inventory;
+    private Map<String, List<String>> database;
 
     public TerraBot(int energyPoints) {
         this.x = 0;
         this.y = 0;
         this.battery = energyPoints;
         this.inventory = new ArrayList<>();
+        this.database = new LinkedHashMap<>();
     }
 
     //metode getter si setter pentru compul privat x
@@ -49,6 +51,14 @@ public class TerraBot {
     }
     public void setInventory(List<Entities> inventory) {
         this.inventory = inventory;
+    }
+
+    //medore getter si setter pentru campul private database
+    public Map<String, List<String>> getDatabase() {
+        return this.database;
+    }
+    public void setDatabase(Map<String, List<String>> database) {
+        this.database = database;
     }
 
     //metoda pentru comanda "moveRobot"
@@ -166,5 +176,28 @@ public class TerraBot {
             return "The scanned object is " + object + ".";
         }
         return "ERROR: Object not found. Cannot perform action";
+    }
+
+    public String learnFact(String subject, String components) {
+        if (this.battery < 2) {
+            return "ERROR: Not enough battery left. Cannot perform action";
+        }
+
+        for (int i = 0; i < inventory.size(); i++) {
+            Entities entity = inventory.get(i);
+            if (entity.getName().equals(components)) {
+                if (database.containsKey(components)) {
+                    database.get(components).add(subject);
+                    this.battery -= 2;
+                    return "The fact has been successfully saved in the database.";
+                } else {
+                    database.put(components, new ArrayList<>());
+                    database.get(components).add(subject);
+                    this.battery -= 2;
+                    return "The fact has been successfully saved in the database.";
+                }
+            }
+        }
+        return "ERROR: Subject not yet saved. Cannot perform action";
     }
 }

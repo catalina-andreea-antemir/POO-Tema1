@@ -285,8 +285,15 @@ public class Simulation {
         ObjectMapper objMapper = new ObjectMapper();
         ArrayNode out = objMapper.createArrayNode();
         int botCharging = -1;
+        int previousTimestamp = 0;
 
         for (CommandInput commandInput : commands) {
+            if (started) {
+                for (int t = previousTimestamp + 1; t <= commandInput.getTimestamp(); t++) {
+                    entitiesInteractions(map, t);
+                }
+            }
+            previousTimestamp = commandInput.getTimestamp();
             if (commandInput.getCommand().equals("startSimulation")) {
                 started = true;
                 ObjectNode start = objMapper.createObjectNode();
@@ -302,7 +309,6 @@ public class Simulation {
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
-                    entitiesInteractions(map, commandInput);
                     if (botCharging > commandInput.getTimestamp()) {
                         ObjectNode error = objMapper.createObjectNode();
                         error.put("command", commandInput.getCommand());
@@ -324,6 +330,13 @@ public class Simulation {
                         printMap.put("output", map.mapPrint());
                         printMap.put("timestamp", commandInput.getTimestamp());
                         out.add(printMap);
+                    }
+                    if (commandInput.getCommand().equals("printKnowledgeBase")) {
+                        ObjectNode printBase = objMapper.createObjectNode();
+                        printBase.put("command", commandInput.getCommand());
+                        printBase.put("output", printKnowledgeBase(bot.getDatabase()));
+                        printBase.put("timestamp", commandInput.getTimestamp());
+                        out.add(printBase);
                     }
                     if (commandInput.getCommand().equals("moveRobot")) {
                         ObjectNode moveRobot = objMapper.createObjectNode();
@@ -362,6 +375,21 @@ public class Simulation {
                         scanObject.put("message", bot.scanObject(commandInput, map.getCell(bot.getX(), bot.getY())));
                         scanObject.put("timestamp", commandInput.getTimestamp());
                         out.add(scanObject);
+                    }
+                    if (commandInput.getCommand().equals("learnFact")) {
+                        ObjectNode learnFact = objMapper.createObjectNode();
+                        learnFact.put("command", commandInput.getCommand());
+                        learnFact.put("message", bot.learnFact(commandInput.getSubject(), commandInput.getComponents()));
+                        learnFact.put("timestamp", commandInput.getTimestamp());
+                        out.add(learnFact);
+                    }
+                    if (commandInput.getCommand().equals("improveEnvironment")) {
+                        ObjectNode improveEnv = objMapper.createObjectNode();
+                        improveEnv.put("command", commandInput.getCommand());
+                        String msg = improveEnvironment(bot, commandInput, map);
+                        improveEnv.put("message", msg);
+                        improveEnv.put("timestamp", commandInput.getTimestamp());
+                        out.add(improveEnv);
                     }
                     if (commandInput.getCommand().equals("endSimulation")) {
                         ObjectNode end = objMapper.createObjectNode();
@@ -412,14 +440,14 @@ public class Simulation {
             }
             out.set("soil", soil);
         }
-        if (cell.getPlant() != null) {
+        if (cell.getPlant() != null && !cell.getPlant().getIsDead()) {
             ObjectNode plant = objMapper.createObjectNode();
             plant.put("type", cell.getPlant().getType());
             plant.put("name", cell.getPlant().getName());
             plant.put("mass", cell.getPlant().getMass());
             out.set("plants", plant);
         }
-        if (cell.getAnimal() != null) {
+        if (cell.getAnimal() != null && !cell.getAnimal().getIsDead()) {
             ObjectNode animal = objMapper.createObjectNode();
             animal.put("type", cell.getAnimal().getType());
             animal.put("name", cell.getAnimal().getName());
@@ -512,12 +540,12 @@ public class Simulation {
         return message;
     }
 
-    public void entitiesInteractions(MapSimulator map, CommandInput commandInput) {
+    public void entitiesInteractions(MapSimulator map, int timestamp) {
         for (int i = 0; i < map.getCols(); i++) {
             for (int j = 0; j < map.getRows(); j++) {
                 Cell cell = map.getCell(i, j);
                 if (cell.getAir() != null) {
-                    if (commandInput.getTimestamp() >= cell.getAir().getExpirationTime()) {
+                    if (timestamp >= cell.getAir().getExpirationTime()) {
                         cell.getAir().setTemporaryQuality(-1.0);
                     }
                     if (cell.getAnimal() != null) {
@@ -531,15 +559,15 @@ public class Simulation {
                 }
                 if (cell.getWater() != null && cell.getWater().getIsScanned()) {
                     if (cell.getAir() != null) {
-                        if (commandInput.getTimestamp() >= cell.getWater().getAirExpirationTime()) {
+                        if (timestamp >= cell.getWater().getAirExpirationTime()) {
                             cell.getWater().interactionAir(cell.getAir());
-                            cell.getWater().setAirExpirationTime(commandInput.getTimestamp());
+                            cell.getWater().setAirExpirationTime(timestamp);
                         }
                     }
                     if (cell.getSoil() != null) {
-                        if (commandInput.getTimestamp() >= cell.getWater().getSoilExpirationTime()) {
+                        if (timestamp >= cell.getWater().getSoilExpirationTime()) {
                             cell.getWater().interactionSoil(cell.getSoil());
-                            cell.getWater().setSoilExpirationTime(commandInput.getTimestamp());
+                            cell.getWater().setSoilExpirationTime(timestamp);
                         }
                     }
                     if (cell.getPlant() != null && cell.getPlant().getIsScanned() && !cell.getPlant().getIsDead()) {
@@ -575,7 +603,100 @@ public class Simulation {
             }
         }
         for (Animal animal : animalsToMove) {
-            animal.moveAnimal(map, commandInput.getTimestamp());
+            animal.moveAnimal(map, timestamp);
         }
+    }
+
+    //metoda pentru comanda "printKnowledgeBase"
+    public ArrayNode printKnowledgeBase (Map<String, List<String>> database) {
+        ObjectMapper objMapper = new ObjectMapper();
+        ArrayNode out = objMapper.createArrayNode();
+
+        //parcurgem cheile din hashmap
+        for (String key : database.keySet()) {
+            ObjectNode category = objMapper.createObjectNode();
+            //afisam cheia curenta
+            category.put("topic", key);
+            //lista de facts pentru fiecare cheie
+            ArrayNode values = objMapper.createArrayNode();
+            for (String value : database.get(key)) {
+                values.add(value);
+            }
+            //afisam lista
+            category.set("facts", values);
+            out.add(category);
+        }
+        return out;
+    }
+
+    public String improveEnvironment(TerraBot bot, CommandInput commandInput, MapSimulator map) {
+        if (bot.getBattery() < 10) {
+            return "ERROR: Not enough battery left. Cannot perform action";
+        }
+        if (commandInput.getImprovementType().equals("plantVegetation")) {
+            String name = commandInput.getName();
+            if (bot.getDatabase().containsKey(name)) {
+                List<String> facts = bot.getDatabase().get(name);
+                if (facts.contains("Method to plant " + name)) {
+                    Air air = map.getCell(bot.getX(), bot.getY()).getAir();
+                    double val = air.getOxygenLevel() + 0.3;
+                    val = Math.round(val * 100.0) / 100.0;
+                    air.setOxygenLevel(val);
+                    bot.setBattery(bot.getBattery() - 10);
+                    return "The " + name + " was planted successfully.";
+                } else {
+                    return "ERROR: Fact not yet saved. Cannot perform action";
+                }
+            }
+        }
+        if (commandInput.getImprovementType().equals("fertilizeSoil")) {
+            String name = commandInput.getName();
+            if (bot.getDatabase().containsKey(name)) {
+                List<String> facts = bot.getDatabase().get(name);
+                if (facts.contains("Method to fertilize soil with " + name)) {
+                    Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
+                    double val = soil.getOrganicMatter() + 0.3;
+                    val = Math.round(val * 100.0) / 100.0;
+                    soil.setOrganicMatter(val);
+                    bot.setBattery(bot.getBattery() - 10);
+                    return "The soil was successfully fertilized using " + name;
+                } else {
+                    return "ERROR: Fact not yet saved. Cannot perform action";
+                }
+            }
+        }
+        if (commandInput.getImprovementType().equals("increaseHumidity")) {
+            String name = commandInput.getName();
+            if (bot.getDatabase().containsKey(name)) {
+                List<String> facts = bot.getDatabase().get(name);
+                if (facts.contains("Method to increaseHumidity")) {
+                    Air air = map.getCell(bot.getX(), bot.getY()).getAir();
+                    double val = air.getHumidity() + 0.2;
+                    val = Math.round(val * 100.0) / 100.0;
+                    air.setHumidity(val);
+                    bot.setBattery(bot.getBattery() - 10);
+                    return "The air was successfully increased using " + name;
+                } else {
+                    return "ERROR: Fact not yet saved. Cannot perform action";
+                }
+            }
+        }
+        if (commandInput.getImprovementType().equals("increaseMoisture")) {
+            String name = commandInput.getName();
+            if (bot.getDatabase().containsKey(name)) {
+                List<String> facts = bot.getDatabase().get(name);
+                if (facts.contains("Method to increaseMoisture")) {
+                    Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
+                    double val = soil.getWaterRetention() + 0.3;
+                    val = Math.round(val * 100.0) / 100.0;
+                    soil.setWaterRetention(val);
+                    bot.setBattery(bot.getBattery() - 10);
+                    return "The moisture was successfully increased using " + name;
+                } else {
+                    return "ERROR: Fact not yet saved. Cannot perform action";
+                }
+            }
+        }
+        return "ERROR: Subject not yet saved. Cannot perform action";
     }
 }

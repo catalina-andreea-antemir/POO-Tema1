@@ -1,12 +1,19 @@
 package main.simulation;
 
 import fileio.*;
-import main.map.*;
+import main.entities.Air.*;
+import main.entities.Animal.*;
+import main.entities.Plant.*;
+import main.entities.Soil.*;
+import main.entities.Water.*;
 import main.entities.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import main.simulation.map.Cell;
+import main.simulation.map.MapSimulator;
+import main.simulation.robot.TerraBot;
 
 import java.util.*;
 
@@ -18,10 +25,18 @@ public class Simulation {
     private TerraBot bot;
     private List<CommandInput> commands;
     private boolean started;
+    private InputLoader inputLoader;
+    private int currentSimulationIndex;
 
     public Simulation(InputLoader input) {
-        SimulationInput simulation = input.getSimulations().get(0);
         this.commands = input.getCommands();
+        this.inputLoader = input;
+        this.currentSimulationIndex = 0;
+        initSimulation(0);
+    }
+
+    private void initSimulation(int currentSimIndex) {
+        SimulationInput simulation = inputLoader.getSimulations().get(currentSimIndex);
         String[] dims = simulation.getTerritoryDim().split("x");
         this.cols = Integer.parseInt(dims[0]);
         this.rows = Integer.parseInt(dims[1]);
@@ -29,7 +44,6 @@ public class Simulation {
         this.map = new MapSimulator(cols, rows);
         this.bot = new TerraBot(this.energyPoints);
         this.started = false;
-
         populate(simulation.getTerritorySectionParams());
     }
 
@@ -204,7 +218,7 @@ public class Simulation {
         Water water = new Water(waterInput.getName(), waterInput.getMass());
         water.setType(waterInput.getType());
         water.setSalinity(waterInput.getSalinity());
-        water.setpH(waterInput.getPH());
+        water.setPh(waterInput.getPH());
         water.setPurity(waterInput.getPurity());
         water.setTurbidity(waterInput.getTurbidity());
         water.setContaminantIndex(waterInput.getContaminantIndex());
@@ -295,12 +309,21 @@ public class Simulation {
             }
             previousTimestamp = commandInput.getTimestamp();
             if (commandInput.getCommand().equals("startSimulation")) {
-                started = true;
-                ObjectNode start = objMapper.createObjectNode();
-                start.put("command", commandInput.getCommand());
-                start.put("message", "Simulation has started.");
-                start.put("timestamp", commandInput.getTimestamp());
-                out.add(start);
+                if (started) {
+                    ObjectNode error = objMapper.createObjectNode();
+                    error.put("command", commandInput.getCommand());
+                    error.put("message", "ERROR: Simulation already started. Cannot perform action");
+                    error.put("timestamp", commandInput.getTimestamp());
+                    out.add(error);
+                } else {
+                    initSimulation(currentSimulationIndex);
+                    started = true;
+                    ObjectNode start = objMapper.createObjectNode();
+                    start.put("command", commandInput.getCommand());
+                    start.put("message", "Simulation has started.");
+                    start.put("timestamp", commandInput.getTimestamp());
+                    out.add(start);
+                }
             } else {
                 if (!started) {
                     ObjectNode error = objMapper.createObjectNode();
@@ -397,6 +420,7 @@ public class Simulation {
                         end.put("message", "Simulation has ended.");
                         end.put("timestamp", commandInput.getTimestamp());
                         started = false;
+                        currentSimulationIndex++;
                         out.add(end);
                     }
                 }
@@ -471,6 +495,9 @@ public class Simulation {
             air.put("oxygenLevel", cell.getAir().getOxygenLevel());
             air.put("airQuality", cell.getAir().getQuality());
             if (cell.getAir().getType().equals("TropicalAir")) {
+                //rotunjim valoarea la doua zecimale
+                double val = Math.round(cell.getAir().getCo2Level() * 100.0) / 100.0;
+                cell.getAir().setCo2Level(val);
                 air.put("co2Level", cell.getAir().getCo2Level());
             }
             if (cell.getAir().getType().equals("PolarAir")) {
@@ -544,6 +571,15 @@ public class Simulation {
         for (int i = 0; i < map.getCols(); i++) {
             for (int j = 0; j < map.getRows(); j++) {
                 Cell cell = map.getCell(i, j);
+                if (cell.getPlant() != null && cell.getPlant().getIsDead()) {
+                    cell.setPlant(null);
+                }
+                if (cell.getAnimal() != null && cell.getAnimal().getIsDead()) {
+                    cell.setAnimal(null);
+                }
+                if (cell.getWater() != null && cell.getWater().getMass() <= 0) {
+                    cell.setWater(null);
+                }
                 if (cell.getAir() != null) {
                     if (timestamp >= cell.getAir().getExpirationTime()) {
                         cell.getAir().setTemporaryQuality(-1.0);
@@ -591,6 +627,15 @@ public class Simulation {
                         cell.getAnimal().interactionSoil(cell.getSoil());
                     }
                 }
+                if (cell.getPlant() != null && cell.getPlant().getIsDead()) {
+                    cell.setPlant(null);
+                }
+                if (cell.getAnimal() != null && cell.getAnimal().getIsDead()) {
+                    cell.setAnimal(null);
+                }
+                if (cell.getWater() != null && cell.getWater().getMass() <= 0) {
+                    cell.setWater(null);
+                }
             }
         }
         List<Animal> animalsToMove = new ArrayList<>();
@@ -633,68 +678,104 @@ public class Simulation {
         if (bot.getBattery() < 10) {
             return "ERROR: Not enough battery left. Cannot perform action";
         }
+
+        String name = commandInput.getName();
+        boolean hasItem = false;
+        List<Entities> inventory = bot.getInventory();
+        for (Entities e : inventory) {
+            if (e.getName().equals(name)) {
+                hasItem = true;
+                break;
+            }
+        }
+        if (!hasItem) {
+            return "ERROR: Subject not yet saved. Cannot perform action";
+        }
+        if (!bot.getDatabase().containsKey(name)) {
+            return "ERROR: Fact not yet saved. Cannot perform action";
+        }
+        List<String> facts = bot.getDatabase().get(name);
         if (commandInput.getImprovementType().equals("plantVegetation")) {
-            String name = commandInput.getName();
-            if (bot.getDatabase().containsKey(name)) {
-                List<String> facts = bot.getDatabase().get(name);
-                if (facts.contains("Method to plant " + name)) {
+            if (facts.contains("Method to plant " + name)) {
+                if (map.getCell(bot.getX(), bot.getY()).getAir() != null) {
                     Air air = map.getCell(bot.getX(), bot.getY()).getAir();
                     double val = air.getOxygenLevel() + 0.3;
                     val = Math.round(val * 100.0) / 100.0;
                     air.setOxygenLevel(val);
                     bot.setBattery(bot.getBattery() - 10);
+                    for (int i = 0; i < inventory.size(); i++) {
+                        if (inventory.get(i).getName().equals(name)) {
+                            inventory.remove(i);
+                            break;
+                        }
+                    }
                     return "The " + name + " was planted successfully.";
-                } else {
-                    return "ERROR: Fact not yet saved. Cannot perform action";
                 }
+            } else {
+                return "ERROR: Fact not yet saved. Cannot perform action";
             }
         }
+
         if (commandInput.getImprovementType().equals("fertilizeSoil")) {
-            String name = commandInput.getName();
-            if (bot.getDatabase().containsKey(name)) {
-                List<String> facts = bot.getDatabase().get(name);
-                if (facts.contains("Method to fertilize soil with " + name)) {
+            if (facts.contains("Method to fertilize soil with " + name)) {
+                if (map.getCell(bot.getX(), bot.getY()).getSoil() != null) {
                     Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
                     double val = soil.getOrganicMatter() + 0.3;
                     val = Math.round(val * 100.0) / 100.0;
                     soil.setOrganicMatter(val);
                     bot.setBattery(bot.getBattery() - 10);
+                    for (int i = 0; i < inventory.size(); i++) {
+                        if (inventory.get(i).getName().equals(name)) {
+                            inventory.remove(i);
+                            break;
+                        }
+                    }
                     return "The soil was successfully fertilized using " + name;
-                } else {
-                    return "ERROR: Fact not yet saved. Cannot perform action";
                 }
+            } else {
+                return "ERROR: Fact not yet saved. Cannot perform action";
             }
         }
+
         if (commandInput.getImprovementType().equals("increaseHumidity")) {
-            String name = commandInput.getName();
-            if (bot.getDatabase().containsKey(name)) {
-                List<String> facts = bot.getDatabase().get(name);
-                if (facts.contains("Method to increaseHumidity")) {
+            if (facts.contains("Method to increaseHumidity")) {
+                if (map.getCell(bot.getX(), bot.getY()).getAir() != null) {
                     Air air = map.getCell(bot.getX(), bot.getY()).getAir();
                     double val = air.getHumidity() + 0.2;
                     val = Math.round(val * 100.0) / 100.0;
                     air.setHumidity(val);
                     bot.setBattery(bot.getBattery() - 10);
+                    for (int i = 0; i < inventory.size(); i++) {
+                        if (inventory.get(i).getName().equals(name)) {
+                            inventory.remove(i);
+                            break;
+                        }
+                    }
                     return "The air was successfully increased using " + name;
-                } else {
-                    return "ERROR: Fact not yet saved. Cannot perform action";
                 }
+            } else {
+                return "ERROR: Fact not yet saved. Cannot perform action";
             }
         }
+
         if (commandInput.getImprovementType().equals("increaseMoisture")) {
-            String name = commandInput.getName();
-            if (bot.getDatabase().containsKey(name)) {
-                List<String> facts = bot.getDatabase().get(name);
-                if (facts.contains("Method to increaseMoisture")) {
+            if (facts.contains("Method to increaseMoisture")) {
+                if (map.getCell(bot.getX(), bot.getY()).getSoil() != null) {
                     Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
                     double val = soil.getWaterRetention() + 0.3;
                     val = Math.round(val * 100.0) / 100.0;
                     soil.setWaterRetention(val);
                     bot.setBattery(bot.getBattery() - 10);
+                    for (int i = 0; i < inventory.size(); i++) {
+                        if (inventory.get(i).getName().equals(name)) {
+                            inventory.remove(i);
+                            break;
+                        }
+                    }
                     return "The moisture was successfully increased using " + name;
-                } else {
-                    return "ERROR: Fact not yet saved. Cannot perform action";
                 }
+            } else {
+                return "ERROR: Fact not yet saved. Cannot perform action";
             }
         }
         return "ERROR: Subject not yet saved. Cannot perform action";

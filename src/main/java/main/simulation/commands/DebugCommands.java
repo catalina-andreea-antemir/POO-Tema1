@@ -11,11 +11,20 @@ import java.util.List;
 import java.util.Map;
 
 public class DebugCommands {
+    //Magic number fix
+    private static final double NORMALIZE = 100.0;
 
-    public ObjectNode envCond(Cell cell, CommandInput commandInput) {
+    /**
+     * Method for "printEnvConditions" command
+     * @param cell the current cell
+     * @param commandInput for necessary fields
+     * @return the output
+     */
+    public ObjectNode envCond(final Cell cell, final CommandInput commandInput) {
         ObjectMapper objMapper = new ObjectMapper();
         ObjectNode out = objMapper.createObjectNode();
         boolean desertStorm = false;
+        //printing the desertStorm field for the temporary quality
         if (cell.getAir().getExpirationTime() > commandInput.getTimestamp()) {
             desertStorm = true;
         }
@@ -78,8 +87,8 @@ public class DebugCommands {
             air.put("oxygenLevel", cell.getAir().getOxygenLevel());
             air.put("airQuality", cell.getAir().getQuality());
             if (cell.getAir().getType().equals("TropicalAir")) {
-                //rotunjim valoarea la doua zecimale
-                double val = Math.round(cell.getAir().getCo2Level() * 100.0) / 100.0;
+                //normalizing value
+                double val = Math.round(cell.getAir().getCo2Level() * NORMALIZE) / NORMALIZE;
                 cell.getAir().setCo2Level(val);
                 air.put("co2Level", cell.getAir().getCo2Level());
             }
@@ -100,12 +109,15 @@ public class DebugCommands {
         return out;
     }
 
-    //metoda pentru comanda "printMap"
-    public ArrayNode mapPrint(MapSimulator map) {
+    /**
+     * Method fot "printMap" command
+     * @param map simulation map
+     * @return output node
+     */
+    public ArrayNode mapPrint(final MapSimulator map) {
         ObjectMapper objMapper = new ObjectMapper();
         ArrayNode out = objMapper.createArrayNode();
-
-        //se parcurge matricea
+        //iterating through simulation map
         for (int j = 0; j < map.getRows(); j++) {
             for (int i = 0; i < map.getCols(); i++) {
                 Cell cell = map.getCell(i, j);
@@ -113,10 +125,9 @@ public class DebugCommands {
                 ArrayNode section = objMapper.createArrayNode();
                 section.add(i);
                 section.add(j);
-                //pentru fiecare celula de afiseaza coordonatele
+                //printing coordinates for each map cell
                 node.set("section", section);
-
-                //se numara cate entitati se afla in celula
+                //counting how many entities are in the current cell
                 int numberObj = 0;
                 if (cell.getAnimal() != null) {
                     if (!cell.getAnimal().getIsDead()) {
@@ -132,14 +143,13 @@ public class DebugCommands {
                     numberObj++;
                 }
 
-                //se afiseaza numarul de entitati prezente in celula
+                //printing the number of entities in the cell
                 node.put("totalNrOfObjects", numberObj);
-                //se afiseaza calitatea aerului
+                //printing air quality
                 if (cell.getAir() != null) {
                     node.put("airQuality", cell.getAir().qualityLabel());
                 }
-
-                //se afiseaza calitatea solului
+                //printing soil quality
                 if (cell.getSoil() != null) {
                     node.put("soilQuality", cell.getSoil().qualityLabel());
                 }
@@ -149,22 +159,26 @@ public class DebugCommands {
         return out;
     }
 
-    //metoda pentru comanda "printKnowledgeBase"
-    public ArrayNode printKnowledgeBase (Map<String, List<String>> database) {
+    /**
+     * Method for "printKnowledgeBase" command
+     * @param database database of the robot
+     * @return output node
+     */
+    public ArrayNode printKnowledgeBase(final Map<String, List<String>> database) {
         ObjectMapper objMapper = new ObjectMapper();
         ArrayNode out = objMapper.createArrayNode();
 
-        //parcurgem cheile din hashmap
+        //iterating through hashmap's keys
         for (String key : database.keySet()) {
             ObjectNode category = objMapper.createObjectNode();
-            //afisam cheia curenta
+            //printing the current key
             category.put("topic", key);
-            //lista de facts pentru fiecare cheie
+            //list of facts of each key
             ArrayNode values = objMapper.createArrayNode();
             for (String value : database.get(key)) {
                 values.add(value);
             }
-            //afisam lista
+            //printing the list of facts
             category.set("facts", values);
             out.add(category);
         }

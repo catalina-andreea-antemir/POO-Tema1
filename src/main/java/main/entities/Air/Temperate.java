@@ -38,6 +38,11 @@ public class Temperate extends Air {
     /**
      * Calculates the temporary air quality based on a meteorological event
      * (newSeason; the rest of the n-parameters don't have valid values)
+     * @param rainfall field for Tropical Air
+     * @param windSpeed field for Polar Air
+     * @param newSeason field for Temperate Air
+     * @param desertStorm field for Desert Air
+     * @param numberOfHikers field for Mountain Air
      */
     @Override
     public void meteorologicalEvents(final double rainfall, final double windSpeed,

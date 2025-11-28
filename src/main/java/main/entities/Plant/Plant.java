@@ -122,6 +122,7 @@ public abstract class Plant extends Entities {
 
     /**
      * The plant grows with growthLevel
+     * @param increaseLevel the level with which the plant grows
      */
     public void grow(final double increaseLevel) {
         if (!isDead) {
@@ -136,6 +137,7 @@ public abstract class Plant extends Entities {
 
     /**
      * Interaction Plant - Air (oxygen in the air increases with oxygen produced by the plant)
+     * @param air the air with which the plant interacts
      */
     public void interactionAir(final Air air) {
         if (air != null && !getIsDead() && getIsScanned()) {

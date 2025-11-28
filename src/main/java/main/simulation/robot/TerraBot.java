@@ -7,13 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public class TerraBot {
-    //Magic number fix
-    private static final int INITIAL_POS = -1;
-    private static final int MAX_INTEGER = 9999;
-    private static final int NR_DIRECTIONS = 4;
-    private static final int BATTERY_USAGE_SCAN = 7;
-    private static final int BATTERY_USAGE_LEARN = 2;
-
     private int x; //col position
     private int y; //row position
     private int battery; //battery of the robot

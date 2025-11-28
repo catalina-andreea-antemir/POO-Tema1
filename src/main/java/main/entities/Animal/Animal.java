@@ -86,6 +86,7 @@ public abstract class Animal extends Entities {
 
     /**
      * Check if the animal can produce fertilizer
+     * @return true if it can, false if not
      */
     public boolean canProduceFertilizer() {
         if (this.status.equals("Well-Fed")) {
@@ -111,11 +112,16 @@ public abstract class Animal extends Entities {
     /**
      * Calculate organicMatter according to how many entities the animal consumes
      * Soil Interaction
+     * @param prey the prey which is eaten only by Carnivores/Parasites
+     * @param plant the plant that the animal eats
+     * @param water the water from which the animal drinks
      */
     public abstract void animalEats(Animal prey, Plant plant, Water water);
 
     /**
      * Moving the animal to feed
+     * @param map simulation map
+     * @param timestamp current iteration
      */
     public void moveAnimal(final MapSimulator map, final int timestamp) {
         if (!this.isScanned) {
@@ -208,6 +214,7 @@ public abstract class Animal extends Entities {
     /**
      * Interaction Animal - Soil (if the animal can produce fertilizer, the
      * organicMetter of the soil grows)
+     * @param soil the soil with which the animal interacts
      */
     public void interactionSoil(final Soil soil) {
         if (soil != null && getIsScanned() && canProduceFertilizer()) {

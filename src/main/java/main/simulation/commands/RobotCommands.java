@@ -12,13 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RobotCommands {
+    //Magic number fix
     private static final int INITIAL_POS = -1;
     private static final int MAX_INTEGER = 9999;
     private static final int NR_DIRECTIONS = 4;
     private static final int BATTERY_USAGE_SCAN = 7;
     private static final int BATTERY_USAGE_LEARN = 2;
+    private static final int BATTERY_USAGE_IMPROVE = 10;
+    private static final double OXYGEN_MUL = 0.3;
+    private static final double ORGANIC_MUL = 0.3;
+    private static final double WATER_MUL = 0.3;
+    private static final double HUMIDITY_MUL = 0.2;
+    private static final double NORMALIZE = 100.0;
+
     /**
-     * Method for ordering "moveRobot"
+     * Method for command "moveRobot"
+     * @param bot the robot
+     * @param map the simulation map
      * @return message for each case
      */
     public String moveRobot(final TerraBot bot, final MapSimulator map) {
@@ -81,23 +91,28 @@ public class RobotCommands {
         bot.setX(desiredX);
         bot.setY(desiredY);
         bot.setBattery(bot.getBattery() - bestScore);
-        return "The robot has successfully moved to position (" + bot.getX() + ", " + bot.getY() + ").";
+        int x = bot.getX();
+        int y = bot.getY();
+        return "The robot has successfully moved to position (" + x + ", " + y + ").";
     }
 
     /**
-     * Method for ordering "scanObject"
+     * Method for command "scanObject"
+     * @param bot the robot
+     * @param command the commandInput for accessing the necessary fields
+     * @param cell the current cell
      * @return message for each case
      */
-    public String scanObject(final TerraBot bot, final CommandInput commandInput, final Cell cell) {
+    public String scanObject(final TerraBot bot, final CommandInput command, final Cell cell) {
         //The cost of moving is 7 energyPoints;
         //if the battery does not reach the robot does not scan
         if (bot.getBattery() < BATTERY_USAGE_SCAN) {
             return "ERROR: Not enough energy to perform action";
         }
         String object = "";
-        String color = commandInput.getColor();
-        String smell = commandInput.getSmell();
-        String sound = commandInput.getSound();
+        String color = command.getColor();
+        String smell = command.getSmell();
+        String sound = command.getSound();
 
         //water object (none none none)
         if (color.equals("none") && smell.equals("none") && sound.equals("none")) {
@@ -123,7 +138,7 @@ public class RobotCommands {
                 && !cell.getAnimal().getIsScanned()) {
             bot.setBattery(bot.getBattery() - BATTERY_USAGE_SCAN);
             cell.getAnimal().setIsScanned(true);
-            cell.getAnimal().setExpirationTime(commandInput.getTimestamp());
+            cell.getAnimal().setExpirationTime(command.getTimestamp());
             bot.getInventory().add(cell.getAnimal());
             return "The scanned object is an " + object + ".";
         }
@@ -132,8 +147,8 @@ public class RobotCommands {
                 && !cell.getWater().getIsScanned()) {
             bot.setBattery(bot.getBattery() - BATTERY_USAGE_SCAN);
             cell.getWater().setIsScanned(true);
-            cell.getWater().setAirExpirationTime(commandInput.getTimestamp());
-            cell.getWater().setSoilExpirationTime(commandInput.getTimestamp());
+            cell.getWater().setAirExpirationTime(command.getTimestamp());
+            cell.getWater().setSoilExpirationTime(command.getTimestamp());
             bot.getInventory().add(cell.getWater());
             return "The scanned object is " + object + ".";
         }
@@ -141,14 +156,16 @@ public class RobotCommands {
     }
 
     /**
-     * Method for ordering "learnFact"
+     * Method for command "learnFact"
+     * @param bot the robot
+     * @param subject the key in hashmap (entity name)
+     * @param components the facts that the robot learns
      * @return message for each case
      */
     public String learnFact(final TerraBot bot, final String subject, final String components) {
         if (bot.getBattery() < BATTERY_USAGE_LEARN) {
             return "ERROR: Not enough battery left. Cannot perform action";
         }
-
         //verifying each element in the inventory
         for (int i = 0; i < bot.getInventory().size(); i++) {
             Entities entity = bot.getInventory().get(i);
@@ -171,13 +188,20 @@ public class RobotCommands {
         return "ERROR: Subject not yet saved. Cannot perform action";
     }
 
-    public String improveEnvironment(TerraBot bot, CommandInput commandInput, MapSimulator map) {
-        if (bot.getBattery() < 10) {
+    /**
+     * Method for command improveEnvironment
+     * @param bot the robot
+     * @param comm the commandInput for accessing necessary fields
+     * @param map the simulation map
+     * @return the right message
+     */
+    public String improveEnv(final TerraBot bot, final CommandInput comm, final MapSimulator map) {
+        if (bot.getBattery() < BATTERY_USAGE_IMPROVE) {
             return "ERROR: Not enough battery left. Cannot perform action";
         }
 
-        String name = commandInput.getName();
-        boolean hasItem = false;
+        String name = comm.getName();
+        boolean hasItem = false; //flag for item in inventory
         List<Entities> inventory = bot.getInventory();
         for (Entities e : inventory) {
             if (e.getName().equals(name)) {
@@ -192,14 +216,17 @@ public class RobotCommands {
             return "ERROR: Fact not yet saved. Cannot perform action";
         }
         List<String> facts = bot.getDatabase().get(name);
-        if (commandInput.getImprovementType().equals("plantVegetation")) {
+        if (comm.getImprovementType().equals("plantVegetation")) {
+            //if the fact is there
             if (facts.contains("Method to plant " + name)) {
                 if (map.getCell(bot.getX(), bot.getY()).getAir() != null) {
                     Air air = map.getCell(bot.getX(), bot.getY()).getAir();
-                    double val = air.getOxygenLevel() + 0.3;
-                    val = Math.round(val * 100.0) / 100.0;
+                    //normalizing value
+                    double val = air.getOxygenLevel() + OXYGEN_MUL;
+                    val = Math.round(val * NORMALIZE) / NORMALIZE;
                     air.setOxygenLevel(val);
-                    bot.setBattery(bot.getBattery() - 10);
+                    bot.setBattery(bot.getBattery() - BATTERY_USAGE_IMPROVE);
+                    //removing the subject from the inventory
                     for (int i = 0; i < inventory.size(); i++) {
                         if (inventory.get(i).getName().equals(name)) {
                             inventory.remove(i);
@@ -213,14 +240,17 @@ public class RobotCommands {
             }
         }
 
-        if (commandInput.getImprovementType().equals("fertilizeSoil")) {
+        if (comm.getImprovementType().equals("fertilizeSoil")) {
+            //if the fact is there
             if (facts.contains("Method to fertilize soil with " + name)) {
                 if (map.getCell(bot.getX(), bot.getY()).getSoil() != null) {
                     Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
-                    double val = soil.getOrganicMatter() + 0.3;
-                    val = Math.round(val * 100.0) / 100.0;
+                    //normalizing value
+                    double val = soil.getOrganicMatter() + ORGANIC_MUL;
+                    val = Math.round(val * NORMALIZE) / NORMALIZE;
                     soil.setOrganicMatter(val);
-                    bot.setBattery(bot.getBattery() - 10);
+                    bot.setBattery(bot.getBattery() - BATTERY_USAGE_IMPROVE);
+                    //removing the subject from the inventory
                     for (int i = 0; i < inventory.size(); i++) {
                         if (inventory.get(i).getName().equals(name)) {
                             inventory.remove(i);
@@ -234,14 +264,17 @@ public class RobotCommands {
             }
         }
 
-        if (commandInput.getImprovementType().equals("increaseHumidity")) {
+        if (comm.getImprovementType().equals("increaseHumidity")) {
+            //if the fact is there
             if (facts.contains("Method to increaseHumidity")) {
                 if (map.getCell(bot.getX(), bot.getY()).getAir() != null) {
                     Air air = map.getCell(bot.getX(), bot.getY()).getAir();
-                    double val = air.getHumidity() + 0.2;
-                    val = Math.round(val * 100.0) / 100.0;
+                    //normalizing value
+                    double val = air.getHumidity() + HUMIDITY_MUL;
+                    val = Math.round(val * NORMALIZE) / NORMALIZE;
                     air.setHumidity(val);
-                    bot.setBattery(bot.getBattery() - 10);
+                    bot.setBattery(bot.getBattery() - BATTERY_USAGE_IMPROVE);
+                    //removing the subject from the inventory
                     for (int i = 0; i < inventory.size(); i++) {
                         if (inventory.get(i).getName().equals(name)) {
                             inventory.remove(i);
@@ -255,14 +288,17 @@ public class RobotCommands {
             }
         }
 
-        if (commandInput.getImprovementType().equals("increaseMoisture")) {
+        if (comm.getImprovementType().equals("increaseMoisture")) {
+            //if the fact is there
             if (facts.contains("Method to increaseMoisture")) {
                 if (map.getCell(bot.getX(), bot.getY()).getSoil() != null) {
                     Soil soil = map.getCell(bot.getX(), bot.getY()).getSoil();
-                    double val = soil.getWaterRetention() + 0.3;
-                    val = Math.round(val * 100.0) / 100.0;
+                    //normalizing value
+                    double val = soil.getWaterRetention() + WATER_MUL;
+                    val = Math.round(val * NORMALIZE) / NORMALIZE;
                     soil.setWaterRetention(val);
-                    bot.setBattery(bot.getBattery() - 10);
+                    bot.setBattery(bot.getBattery() - BATTERY_USAGE_IMPROVE);
+                    //removing the subject from the inventory
                     for (int i = 0; i < inventory.size(); i++) {
                         if (inventory.get(i).getName().equals(name)) {
                             inventory.remove(i);

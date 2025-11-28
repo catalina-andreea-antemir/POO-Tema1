@@ -32,6 +32,9 @@ public class Herbivores extends Animal {
 
     /**
      * Calculate organicMatter according to how many entities the animal consumes
+     * @param prey the prey which is eaten only by Carnivores/Parasites
+     * @param plant the plant that the animal eats
+     * @param water the water from which the animal drinks
      */
     @Override
     public void animalEats(final Animal prey, final Plant plant, final Water water) {

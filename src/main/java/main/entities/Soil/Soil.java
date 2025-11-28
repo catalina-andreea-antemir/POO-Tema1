@@ -101,6 +101,8 @@ public abstract class Soil extends Entities {
 
     /**
      * Helper method for normalization
+     * @param score score
+     * @return normalized value of score
      */
     protected double normalize(final double score) {
         double normalized = Math.max(0, Math.min(MAX_NORMALIZE, score));
@@ -152,6 +154,7 @@ public abstract class Soil extends Entities {
 
     /**
      * Interaction Soil - Plant (soil makes the plant grow by 0.2)
+     * @param plant the plant with which the soil interacts
      */
     public void interactionPlant(final Plant plant) {
         if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {

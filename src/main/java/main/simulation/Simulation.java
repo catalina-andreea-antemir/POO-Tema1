@@ -1,14 +1,16 @@
 package main.simulation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import fileio.InputLoader;
 import fileio.CommandInput;
 import fileio.SimulationInput;
 
-import main.simulation.commands.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import main.simulation.commands.DebugCommands;
+import main.simulation.commands.RobotCommands;
+import main.simulation.commands.EnvironmentCommands;
 
 import main.simulation.map.MapSimulator;
 import main.simulation.robot.TerraBot;
@@ -16,21 +18,21 @@ import main.simulation.robot.TerraBot;
 import java.util.List;
 
 public class Simulation {
-    private int rows;
-    private int cols;
-    private int energyPoints;
-    private MapSimulator map;
-    private TerraBot bot;
-    private List<CommandInput> commands;
-    private boolean started;
-    private InputLoader inputLoader;
-    private int currentSimulationIndex;
-    private ReaderSimulation jsonReader;
-    private RobotCommands robotComm;
-    private EnvironmentCommands envComm;
-    private DebugCommands debugComm;
+    private int rows; //map rows
+    private int cols; //map cols
+    private int energyPoints; //robot energy points
+    private MapSimulator map; //simulation map
+    private TerraBot bot; //terraBot
+    private List<CommandInput> commands; //simulation commands
+    private boolean started; //flag for verifying if the simulation already started or not
+    private InputLoader inputLoader; //helper to read from JSON file
+    private int currentSimulationIndex; //sim index to start if there are more then one
+    private ReaderSimulation jsonReader; //field for ReaderSimulation instance
+    private RobotCommands robotComm; //field for handling commands for robot
+    private EnvironmentCommands envComm; //field for handling commands for environment
+    private DebugCommands debugComm; //field for handling commands for debug
 
-    public Simulation(InputLoader input) {
+    public Simulation(final InputLoader input) {
         this.commands = input.getCommands();
         this.inputLoader = input;
         this.currentSimulationIndex = 0;
@@ -41,7 +43,11 @@ public class Simulation {
         initSimulation(0);
     }
 
-    private void initSimulation(int currentSimIndex) {
+    /**
+     * Method for initializing the simulation
+     * @param currentSimIndex the index for knowing which simulation we start
+     */
+    private void initSimulation(final int currentSimIndex) {
         SimulationInput simulation = inputLoader.getSimulations().get(currentSimIndex);
         String[] dims = simulation.getTerritoryDim().split("x");
         this.cols = Integer.parseInt(dims[0]);
@@ -53,13 +59,20 @@ public class Simulation {
         jsonReader.populate(this.map, simulation.getTerritorySectionParams());
     }
 
+    /**
+     * Method for running the current simulation
+     * Helps with handling each command and writing the result in the JSON output file
+     * @return out = the output for the JSON output file
+     */
     public ArrayNode runSimulation() {
         ObjectMapper objMapper = new ObjectMapper();
         ArrayNode out = objMapper.createArrayNode();
-        int botCharging = -1;
+        int botCharging = -1; //flag for verifying if the robot finished charging
+        //flag for handling the 2 iterations gap for the interactions between the entities
         int previousTimestamp = 0;
 
         for (CommandInput commandInput : commands) {
+            //if sim started the env interactions will happen in the required time interval
             if (started) {
                 for (int t = previousTimestamp + 1; t <= commandInput.getTimestamp(); t++) {
                     envComm.entitiesInteractions(map, t);
@@ -67,12 +80,15 @@ public class Simulation {
             }
             previousTimestamp = commandInput.getTimestamp();
             if (commandInput.getCommand().equals("startSimulation")) {
+                //if there is no sim started we can't start a new one so we return an error msg
                 if (started) {
                     ObjectNode error = objMapper.createObjectNode();
                     error.put("command", commandInput.getCommand());
-                    error.put("message", "ERROR: Simulation already started. Cannot perform action");
+                    String msg = "ERROR: Simulation already started. Cannot perform action";
+                    error.put("message", msg);
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
+                //starting a new simulation if one is not currently running
                 } else {
                     initSimulation(currentSimulationIndex);
                     started = true;
@@ -82,14 +98,17 @@ public class Simulation {
                     start.put("timestamp", commandInput.getTimestamp());
                     out.add(start);
                 }
+                //if current sim not started + receiving comm diff from the start one print err msg
             } else {
                 if (!started) {
                     ObjectNode error = objMapper.createObjectNode();
                     error.put("command", commandInput.getCommand());
-                    error.put("message", "ERROR: Simulation not started. Cannot perform action");
+                    String msg = "ERROR: Simulation not started. Cannot perform action";
+                    error.put("message", msg);
                     error.put("timestamp", commandInput.getTimestamp());
                     out.add(error);
                 } else {
+                    //ignoring other commands in the recharging time
                     if (botCharging > commandInput.getTimestamp()) {
                         ObjectNode error = objMapper.createObjectNode();
                         error.put("command", commandInput.getCommand());
@@ -101,7 +120,9 @@ public class Simulation {
                     if (commandInput.getCommand().equals("printEnvConditions")) {
                         ObjectNode printEnv = objMapper.createObjectNode();
                         printEnv.put("command", commandInput.getCommand());
-                        printEnv.put("output", debugComm.envCond(map.getCell(bot.getX(), bot.getY()), commandInput));
+                        int x = bot.getX(), y = bot.getY();
+                        ObjectNode op = debugComm.envCond(map.getCell(x, y), commandInput);
+                        printEnv.put("output", op);
                         printEnv.put("timestamp", commandInput.getTimestamp());
                         out.add(printEnv);
                     }
@@ -130,7 +151,8 @@ public class Simulation {
                         ObjectNode rechargeBattery = objMapper.createObjectNode();
                         int timeToCharge = commandInput.getTimeToCharge();
                         rechargeBattery.put("command", commandInput.getCommand());
-                        bot.setBattery(bot.getBattery() + timeToCharge);
+                        bot.setBattery(bot.getBattery() + timeToCharge); //we update the battery
+                        //set timestamp for when the robot becomes available
                         botCharging = commandInput.getTimestamp() + timeToCharge;
                         rechargeBattery.put("message", "Robot battery is charging.");
                         rechargeBattery.put("timestamp", commandInput.getTimestamp());
@@ -139,35 +161,41 @@ public class Simulation {
                     if (commandInput.getCommand().equals("getEnergyStatus")) {
                         ObjectNode getEnergyStatus = objMapper.createObjectNode();
                         getEnergyStatus.put("command", commandInput.getCommand());
-                        getEnergyStatus.put("message", "TerraBot has " + bot.getBattery() + " energy points left.");
+                        String msg = "TerraBot has " + bot.getBattery() + " energy points left.";
+                        getEnergyStatus.put("message", msg);
                         getEnergyStatus.put("timestamp", commandInput.getTimestamp());
                         out.add(getEnergyStatus);
                     }
                     if (commandInput.getCommand().equals("changeWeatherConditions")) {
                         ObjectNode changeConditions = objMapper.createObjectNode();
                         changeConditions.put("command", commandInput.getCommand());
-                        changeConditions.put("message", envComm.changeWeatherConditions(map, commandInput));
+                        String msg = envComm.changeWeatherConditions(map, commandInput);
+                        changeConditions.put("message", msg);
                         changeConditions.put("timestamp", commandInput.getTimestamp());
                         out.add(changeConditions);
                     }
                     if (commandInput.getCommand().equals("scanObject")) {
                         ObjectNode scanObject = objMapper.createObjectNode();
                         scanObject.put("command", commandInput.getCommand());
-                        scanObject.put("message", robotComm.scanObject(bot, commandInput, map.getCell(bot.getX(), bot.getY())));
+                        int x = bot.getX(), y = bot.getY();
+                        String msg = robotComm.scanObject(bot, commandInput, map.getCell(x, y));
+                        scanObject.put("message", msg);
                         scanObject.put("timestamp", commandInput.getTimestamp());
                         out.add(scanObject);
                     }
                     if (commandInput.getCommand().equals("learnFact")) {
                         ObjectNode learnFact = objMapper.createObjectNode();
                         learnFact.put("command", commandInput.getCommand());
-                        learnFact.put("message", robotComm.learnFact(bot, commandInput.getSubject(), commandInput.getComponents()));
+                        String comp = commandInput.getComponents();
+                        String msg = robotComm.learnFact(bot, commandInput.getSubject(), comp);
+                        learnFact.put("message", msg);
                         learnFact.put("timestamp", commandInput.getTimestamp());
                         out.add(learnFact);
                     }
                     if (commandInput.getCommand().equals("improveEnvironment")) {
                         ObjectNode improveEnv = objMapper.createObjectNode();
                         improveEnv.put("command", commandInput.getCommand());
-                        String msg = robotComm.improveEnvironment(bot, commandInput, map);
+                        String msg = robotComm.improveEnv(bot, commandInput, map);
                         improveEnv.put("message", msg);
                         improveEnv.put("timestamp", commandInput.getTimestamp());
                         out.add(improveEnv);
@@ -177,8 +205,8 @@ public class Simulation {
                         end.put("command", commandInput.getCommand());
                         end.put("message", "Simulation has ended.");
                         end.put("timestamp", commandInput.getTimestamp());
-                        started = false;
-                        currentSimulationIndex++;
+                        started = false; //mark simulation as finished
+                        currentSimulationIndex++; //increment index to prevent repetition
                         out.add(end);
                     }
                 }

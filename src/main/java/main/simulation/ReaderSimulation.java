@@ -41,7 +41,13 @@ import main.entities.Water.Water;
 import main.simulation.map.MapSimulator;
 
 public class ReaderSimulation {
-    public void populate(MapSimulator map, TerritorySectionParamsInput params) {
+
+    /**
+     * Populates the simulation map with entities based on the provided configuration parameters
+     * @param map simulation map
+     * @param params parameters on the map for each entity
+     */
+    public void populate(final MapSimulator map, final TerritorySectionParamsInput params) {
         for (AnimalInput animalInput : params.getAnimals()) {
             for (PairInput pair : animalInput.getSections()) {
                 Animal animal = initAnimal(animalInput);
@@ -76,7 +82,12 @@ public class ReaderSimulation {
         }
     }
 
-    private Soil initSoil(SoilInput soil) {
+    /**
+     * Initializing the soil fields with the values that we read from the JSON input file
+     * @param soil soil entity
+     * @return the type of soil with its fields initialized
+     */
+    private Soil initSoil(final SoilInput soil) {
         if (soil.getType().equals("ForestSoil")) {
             ForestSoil forestSoil = new ForestSoil(soil.getName(), soil.getMass());
             forestSoil.setType(soil.getType());
@@ -150,14 +161,21 @@ public class ReaderSimulation {
         return null;
     }
 
-    private Plant initPlant(PlantInput plant) {
+    /**
+     * Initializing the plant fields with the values that we read from the JSON input file
+     * @param plant plant entity
+     * @return the type of plant with its fields initialized
+     */
+    private Plant initPlant(final PlantInput plant) {
         if (plant.getType().equals("FloweringPlants")) {
             FloweringPlants floweringPlants = new FloweringPlants(plant.getName(), plant.getMass());
             floweringPlants.setType(plant.getType());
             return floweringPlants;
         }
         if (plant.getType().equals("GymnospermsPlants")) {
-            GymnospermsPlants gymnospermsPlants = new GymnospermsPlants(plant.getName(), plant.getMass());
+            String name = plant.getName();
+            double mass = plant.getMass();
+            GymnospermsPlants gymnospermsPlants = new GymnospermsPlants(name, mass);
             gymnospermsPlants.setType(plant.getType());
             return gymnospermsPlants;
         }
@@ -179,7 +197,12 @@ public class ReaderSimulation {
         return null;
     }
 
-    private Animal initAnimal(AnimalInput animal) {
+    /**
+     * Initializing the animal fields with the values that we read from the JSON input file
+     * @param animal soil entity
+     * @return the type of animal with its fields initialized
+     */
+    private Animal initAnimal(final AnimalInput animal) {
         if (animal.getType().equals("Carnivores")) {
             Carnivores carnivores = new Carnivores(animal.getName(), animal.getMass());
             carnivores.setType(animal.getType());
@@ -208,7 +231,12 @@ public class ReaderSimulation {
         return null;
     }
 
-    private Water initWater(WaterInput waterInput) {
+    /**
+     * Initializing the water fields with the values that we read from the JSON input file
+     * @param waterInput entity
+     * @return the water with its fields initialized
+     */
+    private Water initWater(final WaterInput waterInput) {
         Water water = new Water(waterInput.getName(), waterInput.getMass());
         water.setType(waterInput.getType());
         water.setSalinity(waterInput.getSalinity());
@@ -220,7 +248,12 @@ public class ReaderSimulation {
         return water;
     }
 
-    private Air initAir(AirInput air) {
+    /**
+     * Initializing the air fields with the values that we read from the JSON input file
+     * @param air air entity
+     * @return the type of air with its fields initialized
+     */
+    private Air initAir(final AirInput air) {
         if (air.getType().equals("TemperateAir")) {
             Temperate temperate = new Temperate(air.getName(), air.getMass());
             temperate.setType(air.getType());

@@ -20,45 +20,35 @@ public class Cell {
         this.soil = null;
     }
 
-    //metode getter si setter pentru campul privat Animal
-    public Animal getAnimal() {
+    //Getter and Setter methods for private class fields
+    public final Animal getAnimal() {
         return this.animal;
     }
-    public void setAnimal(Animal animal) {
+    public final void setAnimal(final Animal animal) {
         this.animal = animal;
     }
-
-    //metode getter si setter pentru campul privat Plant
-    public Plant getPlant() {
+    public final Plant getPlant() {
         return this.plant;
     }
-    public void setPlant(Plant plant) {
+    public final void setPlant(final Plant plant) {
         this.plant = plant;
     }
-
-    //metode getter si setter pentru campul privat Water
-    public Water getWater() {
+    public final Water getWater() {
         return this.water;
     }
-    public void setWater(Water water) {
+    public final void setWater(final Water water) {
         this.water = water;
     }
-
-    //metode getter si setter pentru campul privat Soil
-    public Soil getSoil() {
+    public final Soil getSoil() {
         return this.soil;
     }
-    public void setSoil(Soil soil) {
+    public final void setSoil(final Soil soil) {
         this.soil = soil;
     }
-
-    //metode getter si setter pentru campul privat Air
-    public Air getAir() {
+    public final Air getAir() {
         return this.air;
     }
-    public void setAir(Air air) {
+    public final void setAir(final Air air) {
         this.air = air;
     }
-
-
 }

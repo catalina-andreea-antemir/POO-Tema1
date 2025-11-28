@@ -152,6 +152,7 @@ public class Water extends Entities {
     /**
      * Interaction Water - Soil (waterRetention increases from the soil by
      * 0.1 for every two iterations)
+     * @param soil the soil with which the water interacts
      */
     public void interactionSoil(final Soil soil) {
         if (soil != null) {
@@ -164,6 +165,7 @@ public class Water extends Entities {
     /**
      * Interaction water - Air (water increases humidity in the air by
      * 0.1 once every two iterations)
+     * @param air the air with which the water interacts
      */
     public void interactionAir(final Air air) {
         if (air != null) {
@@ -175,6 +177,7 @@ public class Water extends Entities {
 
     /**
      * Interaction Water - Plant (water grows plant by 0.2)
+     * @param plant the plant with which the water interacts
      */
     public void interactionPlant(final Plant plant) {
         if (plant != null && plant.getIsScanned() && !plant.getIsDead()) {

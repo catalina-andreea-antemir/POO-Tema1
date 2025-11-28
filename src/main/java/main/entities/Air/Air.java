@@ -109,6 +109,8 @@ public abstract class Air extends Entities {
 
     /**
      * Helper method for normalization
+     * @param score score
+     * @return normalized value of score
      */
     protected final double normalize(final double score) {
         double normalized = Math.max(0, Math.min(MAX_NORMALIZE, score));
@@ -141,6 +143,11 @@ public abstract class Air extends Entities {
 
     /**
      * Calculates the new air quality affected by a particular event
+     * @param rainfall field for Tropical Air
+     * @param windSpeed field for Polar Air
+     * @param newSeason field for Temperate Air
+     * @param desertStorm field for Desert Air
+     * @param numberOfHikers field for Mountain Air
      */
     public abstract void meteorologicalEvents(double rainfall, double windSpeed, String newSeason,
                                               boolean desertStorm, int numberOfHikers);
@@ -196,6 +203,7 @@ public abstract class Air extends Entities {
 
     /**
      * Interaction Air-Animal (if the air is toxic the animal becomes Sick)
+     * @param animal the animal with which the air interacts
      */
     public void interactionAnimal(final Animal animal) {
         if (animal != null && animal.getIsScanned() && !animal.getIsDead()) {
